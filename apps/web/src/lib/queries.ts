@@ -1,4 +1,5 @@
 import { sanityFetch } from './live'
+import { client } from './sanity'
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
@@ -159,7 +160,9 @@ export const allArticleParamsQuery = `*[_type == "hb.article" && hidden != true 
 }`
 
 export async function fetchAllArticleParams(): Promise<{ section: string; slug: string }[]> {
-  const { data } = await sanityFetch({ query: allArticleParamsQuery })
+  // Must use the base client — sanityFetch calls draftMode() which requires a request scope,
+  // but generateStaticParams runs at build time outside any request.
+  const data = await client.fetch(allArticleParamsQuery)
   return (data as { section: string; slug: string }[]) ?? []
 }
 
