@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Sanity
+apps/studio/dist/
+
+# Generated types
+apps/studio/sanity.types.ts
+apps/web/sanity.types.ts
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+apps/web/.env.local
+apps/studio/.env.local
+
+# Turbo
+.turbo/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.suo
+.vscode/settings.json
+
+# Misc
+*.log
+npm-debug.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
