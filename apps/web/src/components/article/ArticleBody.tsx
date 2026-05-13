@@ -1,5 +1,8 @@
 import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
+import { CodeBlock } from '../portable-text/CodeBlock'
+import { CodeGroup } from '../portable-text/CodeGroup'
+import { Callout } from '../portable-text/Callout'
 
 // ── Heading with anchor ───────────────────────────────────────────────────────
 
@@ -33,70 +36,6 @@ function HeadingAnchor({ level, children }: { level: 2 | 3 | 4; children: React.
     >
       {children}
     </Tag>
-  )
-}
-
-// ── Code block ────────────────────────────────────────────────────────────────
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function CodeBlock({ value }: { value: any }) {
-  const code = value?.code ?? ''
-  const language = value?.language ?? ''
-
-  return (
-    <div style={{ margin: '1.25rem 0', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-      {language && (
-        <div style={{
-          padding: '4px 12px',
-          fontSize: 11,
-          fontFamily: 'monospace',
-          background: 'var(--color-surface)',
-          color: 'var(--color-text-muted)',
-          borderBottom: '1px solid var(--color-border)',
-        }}>
-          {language}
-        </div>
-      )}
-      <pre style={{
-        margin: 0,
-        padding: '16px',
-        overflowX: 'auto',
-        fontSize: 13,
-        lineHeight: 1.6,
-        background: 'var(--color-bg-subtle)',
-        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-      }}>
-        <code>{code}</code>
-      </pre>
-    </div>
-  )
-}
-
-// ── Callout ───────────────────────────────────────────────────────────────────
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function Callout({ value }: { value: any }) {
-  const tone = value?.tone ?? 'info'
-  const colorMap: Record<string, { bg: string; border: string; text: string }> = {
-    info:    { bg: '#eff6ff', border: '#93c5fd', text: '#1e40af' },
-    warning: { bg: '#fffbeb', border: '#fcd34d', text: '#92400e' },
-    danger:  { bg: '#fef2f2', border: '#fca5a5', text: '#991b1b' },
-    success: { bg: '#f0fdf4', border: '#86efac', text: '#166534' },
-  }
-  const c = colorMap[tone] ?? { bg: '#eff6ff', border: '#93c5fd', text: '#1e40af' }
-
-  return (
-    <div style={{
-      margin: '1.25rem 0',
-      padding: '12px 16px',
-      borderLeft: `4px solid ${c.border}`,
-      background: c.bg,
-      borderRadius: '0 6px 6px 0',
-      color: c.text,
-      fontSize: 14,
-    }}>
-      <PortableText value={value.body ?? []} components={components} />
-    </div>
   )
 }
 
@@ -236,6 +175,7 @@ const components: PortableTextComponents = {
   },
   types: {
     'hb.codeBlock':       CodeBlock,
+    'hb.codeGroup':       CodeGroup,
     'hb.callout':         Callout,
     'hb.figure':          Figure,
     'hb.diagramBlock':    DiagramBlock,
