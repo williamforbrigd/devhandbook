@@ -5,7 +5,9 @@ import { Header } from '../components/layout/Header'
 import { SidebarContent } from '../components/layout/Sidebar'
 import { MobileNav } from '../components/layout/MobileNav'
 import { ThemeProvider } from '../components/layout/ThemeProvider'
+import { TocProvider } from '../components/layout/TocContext'
 import { fetchNavigation, fetchExpertises } from '../lib/queries'
+import { SanityLive } from '../lib/live'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -40,6 +42,7 @@ export default async function RootLayout({
       </head>
       <body>
         <ThemeProvider>
+          <TocProvider>
           {/* Header */}
           <Header />
 
@@ -92,7 +95,9 @@ export default async function RootLayout({
           {/* Mobile drawer with state */}
           <MobileNav navigation={navigation} expertises={expertises} />
 
+          <SanityLive />
           {isDraftMode && <VisualEditing />}
+          </TocProvider>
         </ThemeProvider>
       </body>
     </html>

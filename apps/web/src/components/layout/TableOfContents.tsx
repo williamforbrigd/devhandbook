@@ -8,7 +8,7 @@ export interface TocItem {
   level: 2 | 3
 }
 
-export function TableOfContents({ items }: { items: TocItem[] }) {
+export function TableOfContents({ items }: { items: TocItem[] }): React.JSX.Element | null {
   const [activeId, setActiveId] = useState<string>('')
   const observerRef = useRef<IntersectionObserver | null>(null)
 
@@ -73,7 +73,7 @@ export function TableOfContents({ items }: { items: TocItem[] }) {
 
 // ── Mobile ToC dropdown ───────────────────────────────────────────────────────
 
-export function TableOfContentsMobile({ items }: { items: TocItem[] }) {
+export function TableOfContentsMobile({ items }: { items: TocItem[] }): React.JSX.Element | null {
   const [open, setOpen] = useState(false)
 
   if (items.length === 0) return null

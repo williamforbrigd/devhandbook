@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { SearchDialog } from './SearchDialog'
 import { useTheme } from './ThemeProvider'
 
-export function Header() {
+export function Header(): React.JSX.Element {
   const [searchOpen, setSearchOpen] = useState(false)
   const { theme, setTheme } = useTheme()
 

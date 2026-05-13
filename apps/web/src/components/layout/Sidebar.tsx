@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { NavGroup, NavItem, Expertise, NavigationData } from '../../lib/queries'
@@ -108,11 +108,12 @@ function NavGroupSection({
   activeFilter: Set<string>
 }) {
   const storageKey = `nav-open-${group.title}`
-  const [open, setOpen] = useState(() => {
-    if (typeof window === 'undefined') return true
+  const [open, setOpen] = useState(true)
+
+  useEffect(() => {
     const stored = localStorage.getItem(storageKey)
-    return stored !== 'false'
-  })
+    if (stored !== null) setOpen(stored !== 'false')
+  }, [storageKey])
 
   const toggle = () => {
     const next = !open
@@ -149,7 +150,7 @@ function NavGroupSection({
       </button>
       {open && (
         <div style={{ marginBottom: depth === 0 ? 8 : 2 }}>
-          {group.items.map((item, i) =>
+          {(group.items ?? []).filter(Boolean).map((item, i) =>
             item._type === 'navItem' ? (
               <NavItemLink key={i} item={item as NavItem} activeFilter={activeFilter} />
             ) : (
@@ -170,7 +171,7 @@ export function SidebarContent({
 }: {
   navigation: NavigationData | null
   expertises: Expertise[]
-}) {
+}): React.JSX.Element {
   const [selectedExpertises, setSelectedExpertises] = useState<Set<string>>(new Set())
 
   const toggleExpertise = useCallback((slug: string) => {
@@ -203,7 +204,7 @@ export function SidebarContent({
 
 // ── Mobile drawer ──────────────────────────────────────────────────────────────
 
-export function MobileMenuButton({ onClick }: { onClick: () => void }) {
+export function MobileMenuButton({ onClick }: { onClick: () => void }): React.JSX.Element {
   return (
     <button
       type="button"
@@ -243,7 +244,7 @@ export function MobileDrawer({
   onClose: () => void
   navigation: NavigationData | null
   expertises: Expertise[]
-}) {
+}): React.JSX.Element {
   const drawerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

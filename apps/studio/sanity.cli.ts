@@ -12,4 +12,11 @@ export default defineCliConfig({
       },
     },
   },
+  // @ts-expect-error — typegen is a valid CLI config key but missing from CliConfig types in this version
+  typegen: {
+    enabled: true,
+    path: '../web/src/**/*.{ts,tsx,js,jsx}',
+    schema: './schema.json',
+    generates: '../web/src/sanity/types.ts',
+  },
 })

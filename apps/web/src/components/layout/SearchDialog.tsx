@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 interface SearchDialogProps {
   open: boolean
   onClose: () => void
 }
 
-export function SearchDialog({ open, onClose }: SearchDialogProps) {
+export function SearchDialog({ open, onClose }: SearchDialogProps): React.JSX.Element | null {
   const dialogRef = useRef<HTMLDialogElement>(null)
 
   useEffect(() => {

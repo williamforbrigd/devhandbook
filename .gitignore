@@ -11,7 +11,9 @@ apps/studio/dist/
 
 # Generated types
 apps/studio/sanity.types.ts
+apps/studio/schema.json
 apps/web/sanity.types.ts
+apps/web/src/sanity/types.ts
 
 # Environment variables
 .env

@@ -43,3 +43,8 @@ body {
   .hide-below-lg { display: none !important; }
 }
 
+/* Show only on small screens (mobile ToC dropdown) */
+@media (min-width: 1024px) {
+  .show-below-lg { display: none !important; }
+}
+
