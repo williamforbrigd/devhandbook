@@ -2,8 +2,10 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { fetchArticle, fetchAllArticleParams, fetchRelatedFallback } from '../../../lib/queries'
 import type { RelatedArticle } from '../../../lib/queries'
+import { articleToMarkdown } from '../../../lib/portableTextToMarkdown'
 import { ArticleBody, extractTocItems } from '../../../components/article/ArticleBody'
 import { MaturityBadge } from '../../../components/article/MaturityBadge'
+import { CopyMarkdownButtons } from '../../../components/article/CopyMarkdownButtons'
 import { RelatedSkillsSection } from '../../../components/article/RelatedSkillsSection'
 import { TocRegistrar, TableOfContentsMobile } from '../../../components/layout/TocContext'
 
@@ -39,6 +41,18 @@ export default async function ArticlePage({
 
   const tocItems = extractTocItems(article.body)
 
+  const markdown = articleToMarkdown(
+    {
+      title: article.title,
+      slug: article.slug,
+      section,
+      maturity: article.maturity,
+      lastVerifiedAt: article.lastVerifiedAt ?? null,
+      expertises: (article.expertises ?? []).map((e) => e.title),
+    },
+    article.body ?? [],
+  )
+
   // ── Related articles: curated first, then fallback to fill up to 4 ──────────
   const curated = article.relatedArticles ?? []
   let related: RelatedArticle[] = curated
@@ -67,16 +81,22 @@ export default async function ArticlePage({
         </div>
       )}
 
-      {/* Title */}
-      <h1 style={{
-        fontSize: 'clamp(1.5rem, 3vw, 2rem)',
-        fontWeight: 800,
-        lineHeight: 1.2,
-        color: 'var(--color-text)',
-        margin: '0 0 12px',
-      }}>
-        {article.title}
-      </h1>
+      {/* Title + copy buttons */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
+        <h1 style={{
+          flex: 1,
+          fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+          fontWeight: 800,
+          lineHeight: 1.2,
+          color: 'var(--color-text)',
+          margin: 0,
+        }}>
+          {article.title}
+        </h1>
+        <div style={{ flexShrink: 0, paddingTop: 6 }}>
+          <CopyMarkdownButtons markdown={markdown} path={`/${section}/${slug}`} />
+        </div>
+      </div>
 
       {/* Metadata row */}
       <div style={{
