@@ -1,52 +1,125 @@
 import React from 'react'
 import Link from 'next/link'
+import { fetchAllSectionsWithCounts, fetchRecentArticles } from '../lib/queries'
 import { SearchTrigger } from '../components/layout/SearchTrigger'
+import { Icon } from '../components/ui/Icon'
+import { APP_VERSION_LABEL } from '../lib/version'
 
-const SECTIONS = [
-  { href: '/guides',     label: 'Guides',     description: 'Step-by-step walkthroughs' },
-  { href: '/principles', label: 'Principles', description: 'Engineering values and beliefs' },
-  { href: '/glossary',   label: 'Glossary',   description: 'Key terms defined' },
-  { href: '/ai-skills',  label: 'AI Skills',  description: 'Prompts and workflows for AI' },
-]
+const dateFormatter = new Intl.DateTimeFormat('nb-NO', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+})
 
-export default function Home(): React.JSX.Element {
+function formatDate(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return dateFormatter.format(d)
+}
+
+function articleCount(n: number): string {
+  return `${n} ${n === 1 ? 'artikkel' : 'artikler'}`
+}
+
+export default async function Home(): Promise<React.JSX.Element> {
+  const [sections, recent] = await Promise.all([
+    fetchAllSectionsWithCounts(),
+    fetchRecentArticles(4),
+  ])
+
   return (
-    <div style={{ maxWidth: 640 }}>
-      <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, margin: '0 0 12px', color: 'var(--color-text)', lineHeight: 1.15 }}>
-        Best practices, med kilde i kode.
-      </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 16, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
-        Mønstre, beslutninger og felles ground truth for utviklerne i Acme.
-        Skrevet av folkene som faktisk har kjørt det i prod.
-      </p>
+    <>
+      {/* Hero */}
+      <section className="hb-hero">
+        <div className="hb-hero__eyebrow">Handbook · {APP_VERSION_LABEL}</div>
+        <h1>
+          Best practices,
+          <br />
+          med kilde i kode.
+        </h1>
+        <p className="hb-hero__lede">
+          Mønstre, beslutninger og felles ground truth for utviklerne i Acme.
+          Skrevet av folkene som faktisk har kjørt det i prod.
+        </p>
+        <div style={{ marginTop: 16 }}>
+          <SearchTrigger variant="wide" />
+        </div>
+      </section>
 
-      <div style={{ margin: '0 0 40px' }}>
-        <SearchTrigger variant="wide" />
-      </div>
+      {/* Browse by area */}
+      {sections.length > 0 && (
+        <>
+          <div className="hb-sectitle">
+            <h2>Browse by area</h2>
+          </div>
+          <div className="hb-secgrid">
+            {sections.map((s) => {
+              return (
+                <Link
+                  key={s._id}
+                  href={`/${s.slug}`}
+                  className="hb-seccard"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  {s.icon && (
+                    <span className="hb-seccard__icon">
+                      <Icon name={s.icon} size={20} />
+                    </span>
+                  )}
+                  <div className="hb-seccard__title">{s.title}</div>
+                  {s.description && <div className="hb-seccard__desc">{s.description}</div>}
+                  <div className="hb-seccard__foot">
+                    <span className="hb-seccard__meta">{articleCount(s.count)}</span>
+                    <span className="hb-seccard__open">
+                      Åpne <Icon name="arrowUpRight" size={12} />
+                    </span>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </>
+      )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
-        {SECTIONS.map((s) => (
-          <Link
-            key={s.href}
-            href={s.href}
-            style={{
-              display: 'block',
-              padding: '20px 24px',
-              border: '1px solid var(--color-border)',
-              borderRadius: 10,
-              textDecoration: 'none',
-              background: 'var(--color-bg-subtle)',
-            }}
-          >
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)', marginBottom: 4 }}>
-              {s.label}
-            </div>
-            <div style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
-              {s.description}
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
+      {/* Recently updated */}
+      {recent.length > 0 && (
+        <>
+          <div className="hb-sectitle" style={{ marginTop: 32 }}>
+            <h2>Recently updated</h2>
+          </div>
+          <div className="hb-related-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+            {recent.map((r) => {
+              const sectionSlug = r.section?.slug
+              const sectionTitle = r.section?.title ?? ''
+              const expertises = r.expertises ?? []
+              const href = sectionSlug ? `/${sectionSlug}/${r.slug}` : `/${r.slug}`
+              return (
+                <Link
+                  key={r._id}
+                  href={href}
+                  className="hb-card"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <div className="hb-card__top">
+                    <span className="hb-card__section">{sectionTitle}</span>
+                  </div>
+                  <h3 className="hb-card__title">{r.title}</h3>
+                  {r.summary && <p className="hb-card__summary">{r.summary}</p>}
+                  <div className="hb-card__foot">
+                    <div className="hb-card__chips">
+                      {expertises.slice(0, 2).map((e) => (
+                        <span key={e.slug} className="hb-card__chip">{e.title}</span>
+                      ))}
+                    </div>
+                    {r.date && <span>{formatDate(r.date)}</span>}
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </>
+      )}
+    </>
   )
 }

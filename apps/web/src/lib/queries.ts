@@ -303,6 +303,58 @@ export async function fetchSectionArticles(section: string): Promise<ArticleList
   return (data as ArticleListItem[]) ?? []
 }
 
+// ── All sections (home page) ──────────────────────────────────────────────────
+
+export interface SectionWithCount extends SectionData {
+  icon: string | null
+  count: number
+}
+
+export const allSectionsWithCountsQuery = `*[_type == "hb.section"]
+  | order(coalesce(order, 9999) asc, title asc) {
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  icon,
+  "count": count(*[_type == "hb.article" && references(^._id) && hidden != true])
+}`
+
+export async function fetchAllSectionsWithCounts(): Promise<SectionWithCount[]> {
+  const { data } = await sanityFetch({ query: allSectionsWithCountsQuery })
+  return (data as SectionWithCount[]) ?? []
+}
+
+// ── Recent articles (home page) ───────────────────────────────────────────────
+
+export interface RecentArticle {
+  _id: string
+  title: string
+  slug: string
+  summary: string | null
+  maturity: Maturity
+  section: { title: string; slug: string }
+  expertises: { title: string; slug: string }[]
+  date: string | null
+}
+
+export const recentArticlesQuery = `*[_type == "hb.article" && hidden != true]
+  | order(coalesce(lastVerifiedAt, _updatedAt) desc) [0...$limit] {
+  _id,
+  title,
+  "slug": slug.current,
+  summary,
+  maturity,
+  "section": section->{title, "slug": slug.current},
+  "expertises": expertises[]->{title, "slug": slug.current},
+  "date": coalesce(lastVerifiedAt, _updatedAt)
+}`
+
+export async function fetchRecentArticles(limit = 4): Promise<RecentArticle[]> {
+  const { data } = await sanityFetch({ query: recentArticlesQuery, params: { limit } })
+  return (data as RecentArticle[]) ?? []
+}
+
 // ── Guides ────────────────────────────────────────────────────────────────────
 
 export interface GuideListItem {
