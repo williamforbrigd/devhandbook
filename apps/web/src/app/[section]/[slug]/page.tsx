@@ -1,8 +1,12 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { fetchArticle, fetchAllArticleParams } from '../../../lib/queries'
+import { fetchArticle, fetchAllArticleParams, fetchRelatedFallback } from '../../../lib/queries'
+import type { RelatedArticle } from '../../../lib/queries'
+import { articleToMarkdown } from '../../../lib/portableTextToMarkdown'
 import { ArticleBody, extractTocItems } from '../../../components/article/ArticleBody'
 import { MaturityBadge } from '../../../components/article/MaturityBadge'
+import { CopyMarkdownButtons } from '../../../components/article/CopyMarkdownButtons'
+import { RelatedSkillsSection } from '../../../components/article/RelatedSkillsSection'
 import { TocRegistrar, TableOfContentsMobile } from '../../../components/layout/TocContext'
 
 // ── Static params ─────────────────────────────────────────────────────────────
@@ -37,6 +41,34 @@ export default async function ArticlePage({
 
   const tocItems = extractTocItems(article.body)
 
+  const markdown = articleToMarkdown(
+    {
+      title: article.title,
+      slug: article.slug,
+      section,
+      maturity: article.maturity,
+      lastVerifiedAt: article.lastVerifiedAt ?? null,
+      expertises: (article.expertises ?? []).map((e) => e.title),
+    },
+    article.body ?? [],
+  )
+
+  // ── Related articles: curated first, then fallback to fill up to 4 ──────────
+  const curated = article.relatedArticles ?? []
+  let related: RelatedArticle[] = curated
+  if (curated.length < 4) {
+    const expertiseIds = (article.expertises ?? []).map((e) => e._id)
+    const fallback = await fetchRelatedFallback({
+      currentId: article._id,
+      section,
+      expertiseIds,
+      limit: 4,
+    })
+    const curatedIds = new Set(curated.map((r) => r._id))
+    const extras = fallback.filter((r) => !curatedIds.has(r._id))
+    related = [...curated, ...extras].slice(0, 4)
+  }
+
   return (
     <article>
       {/* Register ToC items client-side for scroll-spy */}
@@ -49,16 +81,22 @@ export default async function ArticlePage({
         </div>
       )}
 
-      {/* Title */}
-      <h1 style={{
-        fontSize: 'clamp(1.5rem, 3vw, 2rem)',
-        fontWeight: 800,
-        lineHeight: 1.2,
-        color: 'var(--color-text)',
-        margin: '0 0 12px',
-      }}>
-        {article.title}
-      </h1>
+      {/* Title + copy buttons */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
+        <h1 style={{
+          flex: 1,
+          fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+          fontWeight: 800,
+          lineHeight: 1.2,
+          color: 'var(--color-text)',
+          margin: 0,
+        }}>
+          {article.title}
+        </h1>
+        <div style={{ flexShrink: 0, paddingTop: 6 }}>
+          <CopyMarkdownButtons markdown={markdown} path={`/${section}/${slug}`} />
+        </div>
+      </div>
 
       {/* Metadata row */}
       <div style={{
@@ -166,32 +204,41 @@ export default async function ArticlePage({
       <ArticleBody body={article.body ?? []} />
 
       {/* Related articles */}
-      {(article.relatedArticles ?? []).length > 0 && (
+      {related.length > 0 && (
         <aside style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid var(--color-border)' }}>
-          <h2 style={{ fontSize: 14, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-muted)', marginBottom: 12 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-muted)', marginBottom: 12 }}>
             Related
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {(article.relatedArticles ?? []).map((r) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {related.map((r) => (
               <a
                 key={r._id}
                 href={`/${r.section.slug}/${r.slug}`}
                 style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 12,
                   fontSize: 14,
-                  color: 'var(--color-link)',
+                  color: 'var(--color-text)',
                   textDecoration: 'none',
-                  padding: '8px 12px',
+                  padding: '9px 12px',
                   borderRadius: 6,
                   border: '1px solid var(--color-border)',
-                  display: 'block',
+                  background: 'var(--color-surface)',
+                  transition: 'border-color 0.1s',
                 }}
               >
-                {r.title}
+                <span style={{ fontWeight: 500 }}>{r.title}</span>
+                <MaturityBadge maturity={r.maturity} />
               </a>
             ))}
           </div>
         </aside>
       )}
+
+      {/* Related AI Skills */}
+      <RelatedSkillsSection skills={article.relatedSkills ?? []}/>
     </article>
   )
 }

@@ -107,7 +107,8 @@ export interface ArticleData {
   expertises: { _id: string; title: string; slug: string }[]
   contributors: Contributor[]
   supersededBy: { title: string; slug: string; section: { slug: string } } | null
-  relatedArticles: { _id: string; title: string; slug: string; section: { slug: string } }[]
+  relatedArticles: { _id: string; title: string; slug: string; section: { slug: string }; maturity: Maturity }[]
+  relatedSkills: { _id: string; title: string; slug: string; skillType: string; summary: string | null; maturity: Maturity }[]
   // body is untyped — rendered via @portabletext/react
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body: any[]
@@ -139,8 +140,10 @@ export const articleQuery = `*[_type == "hb.article"
     _id,
     title,
     "slug": slug.current,
-    "section": section->{"slug": slug.current}
+    "section": section->{"slug": slug.current},
+    maturity
   },
+  "relatedSkills": relatedSkills[]->{_id, title, "slug": slug.current, skillType, summary, maturity},
   "body": body[]{
     ...,
     _type == "hb.hotspotFigure" => {
@@ -189,6 +192,50 @@ export const articleQuery = `*[_type == "hb.article"
 }`
 
 export const articleBySlugQuery = articleQuery
+
+// ── Related articles fallback ─────────────────────────────────────────────────
+
+export interface RelatedArticle {
+  _id: string
+  title: string
+  slug: string
+  section: { slug: string }
+  maturity: Maturity
+}
+
+const relatedArticlesFallbackQuery = `*[
+  _type == "hb.article"
+  && hidden != true
+  && maturity != "deprecated"
+  && _id != $currentId
+  && (
+    section->slug.current == $section
+    || count(expertises[_ref in $expertiseIds]) > 0
+  )
+][0...$limit]{
+  _id, title,
+  "slug": slug.current,
+  "section": section->{"slug": slug.current},
+  maturity
+}`
+
+export async function fetchRelatedFallback({
+  currentId,
+  section,
+  expertiseIds,
+  limit = 4,
+}: {
+  currentId: string
+  section: string
+  expertiseIds: string[]
+  limit?: number
+}): Promise<RelatedArticle[]> {
+  const { data } = await sanityFetch({
+    query: relatedArticlesFallbackQuery,
+    params: { currentId, section, expertiseIds, limit },
+  })
+  return (data as RelatedArticle[]) ?? []
+}
 
 export async function fetchArticle(
   section: string,
@@ -279,6 +326,123 @@ export async function fetchGuides(): Promise<GuideListItem[]> {
   return (data as GuideListItem[]) ?? []
 }
 
+export interface GuideData {
+  _id: string
+  title: string
+  slug: string
+  summary: string | null
+  maturity: Maturity
+  lastVerifiedAt: string | null
+  isLivingDocument: boolean
+  applicableWhen: string | null
+  notApplicableWhen: string | null
+  expertises: { _id: string; title: string; slug: string }[]
+  roles: { _id: string; title: string }[]
+  contributors: Contributor[]
+  phases: { title: string; description: string | null; duration: string | null }[]
+  artifacts: { label: string | null; artifactType: string | null; url: string | null }[]
+  relatedArticles: { _id: string; title: string; slug: string; section: { slug: string }; maturity: Maturity }[]
+  relatedGuides: { _id: string; title: string; slug: string; maturity: Maturity }[]
+  relatedSkills: { _id: string; title: string; slug: string; skillType: string; summary: string | null; maturity: Maturity }[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body: any[]
+}
+
+export const guideBySlugQuery = `*[_type == "hb.guide"
+  && slug.current == $slug
+  && hidden != true
+][0]{
+  _id,
+  title,
+  "slug": slug.current,
+  summary,
+  maturity,
+  lastVerifiedAt,
+  isLivingDocument,
+  applicableWhen,
+  notApplicableWhen,
+  "expertises": expertises[]->{_id, title, "slug": slug.current},
+  "roles": roles[]->{_id, title},
+  "contributors": contributors[]->{
+    _id,
+    name,
+    "avatarUrl": avatar.asset->url
+  },
+  phases[]{ title, description, duration },
+  artifacts[]{ label, artifactType, url },
+  "relatedArticles": relatedArticles[]->{
+    _id, title,
+    "slug": slug.current,
+    "section": section->{"slug": slug.current},
+    maturity
+  },
+  "relatedGuides": relatedGuides[]->{
+    _id, title,
+    "slug": slug.current,
+    maturity
+  },
+  "relatedSkills": relatedSkills[]->{_id, title, "slug": slug.current, skillType, summary, maturity},
+  "body": body[]{
+    ...,
+    _type == "hb.hotspotFigure" => {
+      ...,
+      "imageUrl": image.asset->url
+    },
+    _type == "hb.skillEmbed" => {
+      "skill": skill->{
+        _id, title,
+        "slug": slug.current,
+        summary, skillType, maturity,
+        "promptArtifact": promptArtifact{
+          "systemPrompt": systemPrompt.code,
+          "userPromptTemplate": userPromptTemplate.code,
+          variables[]{ name, description, example }
+        },
+        "workflowArtifact": workflowArtifact{
+          steps[]{ title, prompt, expectedOutput, notes }
+        },
+        "evaluationArtifact": evaluationArtifact{
+          criteria[]{ label, description, scoringGuide }
+        }
+      }
+    },
+    markDefs[]{
+      ...,
+      _type == "internalLink" => {
+        ...,
+        "article": article->{
+          _id,
+          title,
+          "slug": slug.current,
+          "section": section->{"slug": slug.current}
+        }
+      },
+      _type == "glossaryRef" => {
+        ...,
+        "term": term->{_id, term, "slug": slug.current, definition}
+      },
+      _type == "skillRef" => {
+        ...,
+        "skill": skill->{_id, title, "slug": slug.current}
+      }
+    }
+  }
+}`
+
+export async function fetchGuide(slug: string): Promise<GuideData | null> {
+  const { data } = await sanityFetch({ query: guideBySlugQuery, params: { slug } })
+  return data as GuideData | null
+}
+
+export const allGuideParamsQuery = `*[_type == "hb.guide" && hidden != true && defined(slug)]{
+  "slug": slug.current
+}`
+
+export async function fetchAllGuideParams(): Promise<{ slug: string }[]> {
+  const data = await client.fetch(allGuideParamsQuery)
+  return (data as { slug: string }[]) ?? []
+}
+
 // ── Glossary ──────────────────────────────────────────────────────────────────
 
 export interface GlossaryTermItem {
@@ -332,6 +496,8 @@ export interface AiSkillListItem {
   skillType: 'prompt' | 'workflow' | 'evaluation'
   targetModel: string[]
   expertises: { title: string; slug: string }[]
+  lastVerifiedAt: string | null
+  _updatedAt: string
 }
 
 export interface AiSkillFilterParams {
@@ -381,10 +547,11 @@ export const allAiSkillsQuery = `*[_type == "hb.aiSkill"
   && (!defined($maturity) || maturity == $maturity)
   && (!defined($targetModel) || $targetModel in targetModel)
   && (!defined($expertise) || $expertise in expertises[]->slug.current)
-] | order(title asc) {
+] | order(_updatedAt desc) {
   _id, title,
   "slug": slug.current,
   summary, useCase, maturity, skillType, targetModel,
+  lastVerifiedAt, _updatedAt,
   "expertises": expertises[]->{title, "slug": slug.current}
 }`
 
@@ -430,7 +597,39 @@ export async function fetchAiSkill(slug: string): Promise<AiSkillData | null> {
   return data as AiSkillData | null
 }
 
-// ── AI Collections ────────────────────────────────────────────────────────────
+// Minimal query for the plain-text prompt export — only the fields needed
+export const aiSkillPlainQuery = `*[_type == "hb.aiSkill" && slug.current == $slug && hidden != true][0]{
+  title, skillType,
+  "prompt": promptArtifact{
+    "systemPrompt": systemPrompt.code,
+    "userPromptTemplate": userPromptTemplate.code,
+    variables[]{ name, description, example }
+  },
+  "workflow": workflowArtifact{
+    steps[]{ title, prompt, expectedOutput, notes }
+  },
+  "evaluation": evaluationArtifact{
+    criteria[]{ label, description, scoringGuide },
+    "rubric": rubric.code
+  }
+}`
+
+export interface AiSkillPlain {
+  title: string
+  skillType: string
+  prompt: {
+    systemPrompt: string | null
+    userPromptTemplate: string | null
+    variables: { name: string; description: string | null; example: string | null }[]
+  } | null
+  workflow: {
+    steps: { title: string; prompt: string | null; expectedOutput: string | null; notes: string | null }[]
+  } | null
+  evaluation: {
+    criteria: { label: string; description: string | null; scoringGuide: string | null }[]
+    rubric: string | null
+  } | null
+}
 
 export interface AiCollectionItem {
   _id: string

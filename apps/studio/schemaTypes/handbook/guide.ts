@@ -178,6 +178,14 @@ export const guide = defineType({
       of: [{ type: 'reference', to: [{ type: 'hb.guide' }] }],
       validation: (Rule) => Rule.max(4),
     }),
+    defineField({
+      name: 'relatedSkills',
+      title: 'Related AI Skills',
+      type: 'array',
+      group: 'relations',
+      of: [{ type: 'reference', to: [{ type: 'hb.aiSkill' }] }],
+      validation: (Rule) => Rule.max(4),
+    }),
   ],
   preview: {
     select: {
