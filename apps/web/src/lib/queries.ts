@@ -379,6 +379,8 @@ export interface AiSkillListItem {
   skillType: 'prompt' | 'workflow' | 'evaluation'
   targetModel: string[]
   expertises: { title: string; slug: string }[]
+  lastVerifiedAt: string | null
+  _updatedAt: string
 }
 
 export interface AiSkillFilterParams {
@@ -428,10 +430,11 @@ export const allAiSkillsQuery = `*[_type == "hb.aiSkill"
   && (!defined($maturity) || maturity == $maturity)
   && (!defined($targetModel) || $targetModel in targetModel)
   && (!defined($expertise) || $expertise in expertises[]->slug.current)
-] | order(title asc) {
+] | order(_updatedAt desc) {
   _id, title,
   "slug": slug.current,
   summary, useCase, maturity, skillType, targetModel,
+  lastVerifiedAt, _updatedAt,
   "expertises": expertises[]->{title, "slug": slug.current}
 }`
 
