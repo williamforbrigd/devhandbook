@@ -98,6 +98,19 @@ function NavItemLink({ item, activeFilter }: { item: NavItem; activeFilter: Set<
 
 // ── Nav group (recursive) ─────────────────────────────────────────────────────
 
+// Returns false when a filter is active and none of the group's items match it
+function groupHasVisibleItems(group: NavGroup, filter: Set<string>): boolean {
+  if (filter.size === 0) return true
+  return (group.items ?? []).filter(Boolean).some((item) => {
+    if (item._type === 'navItem') {
+      const article = (item as NavItem).article
+      if (!article?.section?.slug) return false
+      return (article.expertises ?? []).some((e) => filter.has(e))
+    }
+    return groupHasVisibleItems(item as NavGroup, filter)
+  })
+}
+
 function NavGroupSection({
   group,
   depth,
@@ -120,6 +133,9 @@ function NavGroupSection({
     setOpen(next)
     localStorage.setItem(storageKey, String(next))
   }
+
+  // Hide group entirely when filter is active and no descendants match
+  if (!groupHasVisibleItems(group, activeFilter)) return null
 
   const paddingLeft = 16 + depth * 12
 

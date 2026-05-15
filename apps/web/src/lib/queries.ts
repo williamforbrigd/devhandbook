@@ -107,7 +107,8 @@ export interface ArticleData {
   expertises: { _id: string; title: string; slug: string }[]
   contributors: Contributor[]
   supersededBy: { title: string; slug: string; section: { slug: string } } | null
-  relatedArticles: { _id: string; title: string; slug: string; section: { slug: string } }[]
+  relatedArticles: { _id: string; title: string; slug: string; section: { slug: string }; maturity: Maturity }[]
+  relatedSkills: { _id: string; title: string; slug: string; skillType: string; summary: string | null; maturity: Maturity }[]
   // body is untyped — rendered via @portabletext/react
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body: any[]
@@ -139,8 +140,10 @@ export const articleQuery = `*[_type == "hb.article"
     _id,
     title,
     "slug": slug.current,
-    "section": section->{"slug": slug.current}
+    "section": section->{"slug": slug.current},
+    maturity
   },
+  "relatedSkills": relatedSkills[]->{_id, title, "slug": slug.current, skillType, summary, maturity},
   "body": body[]{
     ...,
     _type == "hb.hotspotFigure" => {
@@ -189,6 +192,50 @@ export const articleQuery = `*[_type == "hb.article"
 }`
 
 export const articleBySlugQuery = articleQuery
+
+// ── Related articles fallback ─────────────────────────────────────────────────
+
+export interface RelatedArticle {
+  _id: string
+  title: string
+  slug: string
+  section: { slug: string }
+  maturity: Maturity
+}
+
+const relatedArticlesFallbackQuery = `*[
+  _type == "hb.article"
+  && hidden != true
+  && maturity != "deprecated"
+  && _id != $currentId
+  && (
+    section->slug.current == $section
+    || count(expertises[_ref in $expertiseIds]) > 0
+  )
+][0...$limit]{
+  _id, title,
+  "slug": slug.current,
+  "section": section->{"slug": slug.current},
+  maturity
+}`
+
+export async function fetchRelatedFallback({
+  currentId,
+  section,
+  expertiseIds,
+  limit = 4,
+}: {
+  currentId: string
+  section: string
+  expertiseIds: string[]
+  limit?: number
+}): Promise<RelatedArticle[]> {
+  const { data } = await sanityFetch({
+    query: relatedArticlesFallbackQuery,
+    params: { currentId, section, expertiseIds, limit },
+  })
+  return (data as RelatedArticle[]) ?? []
+}
 
 export async function fetchArticle(
   section: string,
