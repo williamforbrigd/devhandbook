@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import { SearchTrigger } from '../components/layout/SearchTrigger'
 
 const SECTIONS = [
   { href: '/guides',     label: 'Guides',     description: 'Step-by-step walkthroughs' },
@@ -12,11 +13,16 @@ export default function Home(): React.JSX.Element {
   return (
     <div style={{ maxWidth: 640 }}>
       <h1 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, margin: '0 0 12px', color: 'var(--color-text)', lineHeight: 1.15 }}>
-        Developer Handbook
+        Best practices, med kilde i kode.
       </h1>
-      <p style={{ margin: '0 0 40px', fontSize: 16, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
-        The source of truth for how we build software — patterns, practices, and shared knowledge.
+      <p style={{ margin: '0 0 24px', fontSize: 16, color: 'var(--color-text-muted)', lineHeight: 1.7 }}>
+        Mønstre, beslutninger og felles ground truth for utviklerne i Acme.
+        Skrevet av folkene som faktisk har kjørt det i prod.
       </p>
+
+      <div style={{ margin: '0 0 40px' }}>
+        <SearchTrigger variant="wide" />
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
         {SECTIONS.map((s) => (

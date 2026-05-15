@@ -10,7 +10,7 @@ export function MobileNav({
 }: {
   navigation: NavigationData | null
   expertises: Expertise[]
-}) {
+}): React.JSX.Element {
   const [open, setOpen] = useState(false)
   return (
     <>

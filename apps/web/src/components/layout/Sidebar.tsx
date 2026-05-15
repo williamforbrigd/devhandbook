@@ -3,7 +3,22 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Icon } from '../ui/Icon'
 import type { NavGroup, NavItem, Expertise, NavigationData } from '../../lib/queries'
+
+// ── Brand block (top of sidebar) ──────────────────────────────────────────────
+
+function SidebarBrand(): React.JSX.Element {
+  return (
+    <div className="hb-side__brand">
+      <Link href="/" className="hb-side__wordmark" aria-label="Dev Handbook home">
+        <Icon name="bookOpen" size={18} />
+        <span>Handbook</span>
+      </Link>
+      <div className="hb-side__sub">Internal POC</div>
+    </div>
+  )
+}
 
 // ── Expertise filter ──────────────────────────────────────────────────────────
 
@@ -11,18 +26,18 @@ function ExpertiseFilter({
   expertises,
   selected,
   onToggle,
+  onClear,
 }: {
   expertises: Expertise[]
   selected: Set<string>
   onToggle: (slug: string) => void
+  onClear: () => void
 }) {
   if (expertises.length === 0) return null
   return (
-    <div style={{ padding: '12px 16px 8px', borderBottom: '1px solid var(--color-border, #e5e7eb)' }}>
-      <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9ca3af', marginBottom: 6 }}>
-        Filter by expertise
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+    <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--hb-border)' }}>
+      <div className="hb-side__sectionlabel" style={{ marginBottom: 8 }}>Filter by expertise</div>
+      <div className="hb-chips">
         {expertises.map((e) => {
           const active = selected.has(e.slug)
           return (
@@ -30,16 +45,8 @@ function ExpertiseFilter({
               key={e.slug}
               type="button"
               onClick={() => onToggle(e.slug)}
-              style={{
-                padding: '2px 8px',
-                borderRadius: 99,
-                border: `1px solid ${active ? '#1d4ed8' : 'var(--color-border, #e5e7eb)'}`,
-                background: active ? '#dbeafe' : 'transparent',
-                color: active ? '#1d4ed8' : '#6b7280',
-                fontSize: 11,
-                fontWeight: active ? 700 : 400,
-                cursor: 'pointer',
-              }}
+              className={`hb-chip${active ? ' is-active' : ''}`}
+              aria-pressed={active}
             >
               {e.title}
             </button>
@@ -48,8 +55,9 @@ function ExpertiseFilter({
         {selected.size > 0 && (
           <button
             type="button"
-            onClick={() => expertises.forEach((e) => selected.has(e.slug) && onToggle(e.slug))}
-            style={{ padding: '2px 6px', fontSize: 11, color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer' }}
+            onClick={onClear}
+            className="hb-chip"
+            style={{ borderStyle: 'dashed' }}
           >
             Clear
           </button>
@@ -77,20 +85,7 @@ function NavItemLink({ item, activeFilter }: { item: NavItem; activeFilter: Set<
   const isActive = pathname === href
 
   return (
-    <Link
-      href={href}
-      style={{
-        display: 'block',
-        padding: '4px 12px 4px 16px',
-        fontSize: 13,
-        color: isActive ? '#1d4ed8' : 'var(--color-text, #374151)',
-        background: isActive ? '#eff6ff' : 'transparent',
-        borderRadius: 4,
-        textDecoration: 'none',
-        fontWeight: isActive ? 600 : 400,
-        borderLeft: `2px solid ${isActive ? '#1d4ed8' : 'transparent'}`,
-      }}
-    >
+    <Link href={href} className={`hb-nav__item${isActive ? ' is-active' : ''}`}>
       {article.title}
     </Link>
   )
@@ -98,7 +93,6 @@ function NavItemLink({ item, activeFilter }: { item: NavItem; activeFilter: Set<
 
 // ── Nav group (recursive) ─────────────────────────────────────────────────────
 
-// Returns false when a filter is active and none of the group's items match it
 function groupHasVisibleItems(group: NavGroup, filter: Set<string>): boolean {
   if (filter.size === 0) return true
   return (group.items ?? []).filter(Boolean).some((item) => {
@@ -134,38 +128,31 @@ function NavGroupSection({
     localStorage.setItem(storageKey, String(next))
   }
 
-  // Hide group entirely when filter is active and no descendants match
   if (!groupHasVisibleItems(group, activeFilter)) return null
 
-  const paddingLeft = 16 + depth * 12
-
   return (
-    <div>
+    <div className="hb-nav__group" style={depth > 0 ? { paddingLeft: 12 } : undefined}>
       <button
         type="button"
         onClick={toggle}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          width: '100%',
-          padding: `6px ${paddingLeft}px`,
-          textAlign: 'left',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          fontSize: depth === 0 ? 12 : 11,
-          fontWeight: 700,
-          textTransform: depth === 0 ? 'uppercase' : 'none',
-          letterSpacing: depth === 0 ? '0.06em' : '0',
-          color: depth === 0 ? '#6b7280' : 'var(--color-text, #374151)',
-        }}
+        className="hb-nav__grouphead"
+        aria-expanded={open}
       >
-        <span style={{ transform: open ? 'rotate(90deg)' : 'none', display: 'inline-block', transition: 'transform 0.15s', fontSize: 10, color: '#9ca3af' }}>▶</span>
-        {group.title}
+        <span
+          className="hb-nav__caret"
+          aria-hidden="true"
+          style={{
+            display: 'inline-flex',
+            transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+            transition: 'transform 150ms ease',
+          }}
+        >
+          <Icon name="chevronRight" size={12} />
+        </span>
+        <span>{group.title}</span>
       </button>
       {open && (
-        <div style={{ marginBottom: depth === 0 ? 8 : 2 }}>
+        <div className="hb-nav__items">
           {(group.items ?? []).filter(Boolean).map((item, i) =>
             item._type === 'navItem' ? (
               <NavItemLink key={i} item={item as NavItem} activeFilter={activeFilter} />
@@ -199,22 +186,23 @@ export function SidebarContent({
     })
   }, [])
 
+  const clearExpertises = useCallback(() => setSelectedExpertises(new Set()), [])
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+    <aside className="hb-side" aria-label="Sidebar">
+      <SidebarBrand />
       <ExpertiseFilter
         expertises={expertises}
         selected={selectedExpertises}
         onToggle={toggleExpertise}
+        onClear={clearExpertises}
       />
-      <nav
-        style={{ flex: 1, overflowY: 'auto', padding: '8px 0 24px' }}
-        aria-label="Site navigation"
-      >
+      <nav className="hb-nav" aria-label="Site navigation">
         {navigation?.groups.map((group, i) => (
           <NavGroupSection key={i} group={group} depth={0} activeFilter={selectedExpertises} />
         ))}
       </nav>
-    </div>
+    </aside>
   )
 }
 

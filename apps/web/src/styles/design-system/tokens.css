@@ -1,0 +1,334 @@
+/* =============================================================================
+   Lasso Design System — Colors & Type
+   Sourced from /design-tokens (Beat) + /styles + Figma "Lasso Komponentbibliotek"
+   ============================================================================= */
+
+/* ---------- Fonts ----------------------------------------------------------- */
+/* Primary body: Hurme Geometric Sans 3
+   Heading variant: Hurme Geometric Sans 4
+   These two are designed as a paired family — No3 has classic 'a'/'g' shapes,
+   No4 has single-storey shapes; they share metrics so they swap cleanly.       */
+
+@font-face { font-family: 'Hurme Geometric Sans 3'; src: url('/fonts/HGS-3/hurme-geometric-sans-no3-300-light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Hurme Geometric Sans 3'; src: url('/fonts/HGS-3/hurme-geometric-sans-no3-400-regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Hurme Geometric Sans 3'; src: url('/fonts/HGS-3/hurme-geometric-sans-no3-oblique-400-regular.woff2') format('woff2'); font-weight: 400; font-style: oblique; font-display: swap; }
+@font-face { font-family: 'Hurme Geometric Sans 3'; src: url('/fonts/HGS-3/hurme-geometric-sans-no3-600-semibold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Hurme Geometric Sans 3'; src: url('/fonts/HGS-3/hurme-geometric-sans-no3-700-bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Hurme Geometric Sans 3'; src: url('/fonts/HGS-3/hurme-geometric-sans-no3-900-black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+
+@font-face { font-family: 'Hurme Geometric Sans 4'; src: url('/fonts/HGS-4/hurme-geometric-sans-no4-400-regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Hurme Geometric Sans 4'; src: url('/fonts/HGS-4/hurme-geometric-sans-no4-600-semibold.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Hurme Geometric Sans 4'; src: url('/fonts/HGS-4/hurme-geometric-sans-no4-700-bold.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Hurme Geometric Sans 4'; src: url('/fonts/HGS-4/hurme-geometric-sans-no4-900-black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
+
+:root {
+  /* ---------- Color Primitives -------------------------------------------- */
+
+  /* Lasso Blue — the brand spine. Used for navigation, CTAs, services hierarchy. */
+  --lasso-blue-50:  #c9caff;
+  --lasso-blue-100: #b9bbff;
+  --lasso-blue-200: #9a9cff;
+  --lasso-blue-300: #7b7eff;
+  --lasso-blue-400: #5c5fff;
+  --lasso-blue-500: #3d41ff;  /* Lasso Blue */
+  --lasso-blue-600: #3337d6;
+  --lasso-blue-700: #292cad;
+  --lasso-blue-800: #202285;
+  --lasso-blue-900: #16175c;
+  --lasso-blue: var(--lasso-blue-500);
+
+  /* Lasso Lilla (Norwegian for "purple") — secondary, used for Expertises hierarchy. */
+  --lasso-lilla-50:  #e2cbff;
+  --lasso-lilla-100: #dabdff;
+  --lasso-lilla-200: #c99fff;
+  --lasso-lilla-300: #b882ff;
+  --lasso-lilla-400: #a864ff;
+  --lasso-lilla-500: #9747ff;  /* Lasso Lilla */
+  --lasso-lilla-600: #7f3cd6;
+  --lasso-lilla-700: #6730ad;
+  --lasso-lilla-800: #4f2585;
+  --lasso-lilla-900: #361a5c;
+  --lasso-lilla: var(--lasso-lilla-500);
+
+  /* UI Grey — text and dark surfaces.                                          */
+  --ui-grey-50:  #c6c6c5;
+  --ui-grey-100: #b6b6b4;
+  --ui-grey-200: #959593;
+  --ui-grey-300: #757472;
+  --ui-grey-400: #545451;
+  --ui-grey-500: #343330;
+  --ui-grey-600: #2c2b28;
+  --ui-grey-700: #232321;
+  --ui-grey-800: #1b1b19;
+  --ui-grey-900: #131211;
+
+  /* UI Background — neutral ash for surfaces, dividers, disabled states.       */
+  --ui-bg-50:  #f2f2f2;
+  --ui-bg-100: #eeeeee;
+  --ui-bg-200: #e6e6e6;
+  --ui-bg-300: #dedede;
+  --ui-bg-400: #d7d7d7;
+  --ui-bg-500: #cfcfcf;
+  --ui-bg-600: #aeaeae;
+  --ui-bg-700: #8d8d8d;
+  --ui-bg-800: #6c6c6c;
+  --ui-bg-900: #4b4b4b;
+
+  --white: #ffffff;
+  --black: #000000;
+
+  /* ---------- Lasso-specific named colors --------------------------------- */
+  --lasso-text-dark-blue:        #090932;   /* primary body text on light bg   */
+  --lasso-heading-frontpage:     #2a1449;   /* deep violet for hero headings   */
+  --lasso-title-text:            var(--lasso-blue-900);
+  --lasso-accent-blue:           #3b3fe7;   /* link / interactive accent       */
+  --lasso-bg-superlight:         #efefff;   /* bluish "paper" tint             */
+  --lasso-meny:                  #f3f3fa;   /* menu surface                    */
+  --lasso-breadcrumb-bg:         #e8e8f2;
+  --lasso-box-bg:                #f8f8f8;
+  --lasso-box-bg-accent:         #f1f2ff;
+  --lasso-box-border:            #d1d1d1;
+  --lasso-scrollbar-tab:         #d7d7fc;
+
+  /* ---------- Status ------------------------------------------------------- */
+  --status-success-light:     #c6f6d5;
+  --status-success-dark:      #00a188;
+  --status-warning-light:     #ffeacb;
+  --status-warning-dark:      #f07d00;
+  --status-error-light:       #fed7d7;
+  --status-error-dark:        #cf022b;
+  --status-information-light: #c1d4f8;
+  --status-information-dark:  #2352aa;
+
+  /* ---------- Service-line themes (used to color whole sections) ---------- */
+  --theme-business-value:        #4c2082;
+  --theme-business-value-light:  #e6e6fa;
+  --theme-discover:              #8b1d82;
+  --theme-discover-light:        #fae8f9;
+  --theme-accelerate:            #cf022b;
+  --theme-accelerate-light:      #ffd6d7;
+  --theme-develop:               #f07d00;
+  --theme-develop-light:         #ff9f4d;
+  --theme-mix: linear-gradient(
+    to right,
+    var(--theme-business-value),
+    var(--theme-discover),
+    var(--theme-accelerate),
+    var(--theme-develop)
+  );
+
+  /* Color-Levels (used to nest service / expertise hierarchies)               */
+  --cl-center-of-excellence:    #eed4ff;
+  --cl-expertises-level-1:      #460067;       /* almost black-purple          */
+  --cl-expertises-level-2:      #7a04b6;
+  --cl-expertises-level-3:      var(--lasso-lilla-400);
+  --cl-services-level-1:        var(--lasso-blue-900);
+  --cl-services-level-2:        var(--lasso-blue-700);
+  --cl-services-level-3:        var(--lasso-blue-500);
+  --cl-services-level-4:        var(--lasso-blue-100);
+
+  /* ---------- Semantic foreground / background --------------------------- */
+  --fg-1:      var(--lasso-text-dark-blue);    /* primary body text           */
+  --fg-2:      var(--ui-grey-700);             /* secondary text              */
+  --fg-3:      var(--ui-grey-300);             /* tertiary / muted            */
+  --fg-on-dark:var(--white);
+  --fg-link:   var(--status-information-dark);
+  --fg-accent: var(--lasso-accent-blue);
+  --fg-title:  var(--lasso-title-text);
+
+  --bg-page:        var(--white);
+  --bg-app:         var(--lasso-meny);          /* app/site neutral surface    */
+  --bg-card:        var(--white);
+  --bg-card-accent: var(--lasso-box-bg-accent); /* light blue-tinted card      */
+  --bg-superlight:  var(--lasso-bg-superlight);
+  --bg-dark:        var(--lasso-blue-900);      /* navy for footer / dark hero */
+  --bg-darker:      var(--lasso-text-dark-blue);
+
+  --border-default: var(--lasso-box-border);
+  --border-soft:    var(--ui-bg-200);
+  --border-strong:  var(--ui-grey-300);
+
+  /* ---------- Type families ---------------------------------------------- */
+  --font-body:    'Hurme Geometric Sans 3', system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+  --font-display: 'Hurme Geometric Sans 4', 'Hurme Geometric Sans 3', system-ui, sans-serif;
+  --font-mono:    ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ---------- Type weights ----------------------------------------------- */
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+  --fw-black:    900;
+
+  /* ---------- Type sizes (px) -------------------------------------------- */
+  --fs-25:   10px;
+  --fs-50:   12px;
+  --fs-75:   14px;
+  --fs-100:  16px;  /* base */
+  --fs-125:  18px;
+  --fs-150:  20px;
+  --fs-200:  24px;
+  --fs-250:  28px;
+  --fs-300:  32px;
+  --fs-400:  40px;
+  --fs-500:  48px;
+  --fs-600:  56px;
+  --fs-700:  64px;
+  --fs-800:  72px;
+  --fs-900:  82px;
+  --fs-1000: 92px;
+  --fs-1100: 102px;
+
+  /* ---------- Semantic type roles ---------------------------------------- */
+  --display-4xl-size:   var(--fs-1100);
+  --display-3xl-size:   var(--fs-1000);
+  --display-2xl-size:   var(--fs-900);
+  --display-xl-size:    var(--fs-800);
+
+  --h1-size: var(--fs-400); /* 40 */
+  --h2-size: var(--fs-300); /* 32 */
+  --h3-size: var(--fs-200); /* 24 */
+  --h4-size: var(--fs-150); /* 20 */
+  --h5-size: var(--fs-100); /* 16 */
+  --h6-size: var(--fs-75);  /* 14 */
+
+  --ingress-md-size: 20px;
+  --ingress-sm-size: 18px;
+  --ingress-xs-size: 14px;
+
+  --body-xl-size: 20px;
+  --body-lg-size: 18px;
+  --body-md-size: 16px;
+  --body-sm-size: 14px;
+  --body-xs-size: 12px;
+
+  /* ---------- Radius ----------------------------------------------------- */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+  --radius-round: 50%;
+
+  /* ---------- Spacing ---------------------------------------------------- */
+  --space-3xs: 2px;
+  --space-xxs: 4px;
+  --space-xs:  8px;
+  --space-sm:  12px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  32px;
+  --space-xxl: 40px;
+  --space-3xl: 48px;
+  --space-4xl: 56px;
+  --space-5xl: 64px;
+  --space-6xl: 80px;
+  --space-7xl: 96px;
+  --space-8xl: 128px;
+  --space-9xl: 160px;
+
+  /* ---------- Shadow ----------------------------------------------------- */
+  --shadow-sm: 0 1px 4px 0 rgba(0,0,0,0.08);
+  --shadow-md: 0 2px 8px 0 rgba(0,0,0,0.16);
+  --shadow-lg: 0 4px 8px 1px rgba(0,0,0,0.20);
+
+  /* ---------- Motion ----------------------------------------------------- */
+  --transition-fast: 150ms ease-out;
+  --transition-base: 300ms ease-in-out;
+
+  /* ---------- Layout widths --------------------------------------------- */
+  --width-content-xs: 590px;
+  --width-content-sm: 768px;
+  --width-content-md: 1024px;
+  --width-content-lg: 1440px;
+  --width-content-xl: 1500px;
+
+  /* Component sizes */
+  --header-height:     106px;
+  --menu-height:       80px;
+  --sidemenu-width:    236px;
+  --footer-height:     15rem;
+  --card-width:        423px;
+  --card-image-width:  216px;
+  --card-image-height: 172px;
+}
+
+/* ============================================================================
+   Base type
+   ============================================================================ */
+html {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: var(--fw-regular);
+  color: var(--fg-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--fg-1);
+  background: var(--bg-page);
+}
+
+/* Headings — display family (HGS4). Front-page hero headings get the deeper
+   violet (--lasso-heading-frontpage); regular section headings use --fg-title. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-body); /* design system uses HGS3 for most headings */
+  color: var(--fg-title);
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0;
+}
+h1 { font-size: var(--h1-size); }
+h2 { font-size: var(--h2-size); }
+h3 { font-size: var(--h3-size); }
+h4 { font-size: var(--h4-size); }
+h5 { font-size: var(--h5-size); }
+h6 { font-size: var(--h6-size); }
+
+p {
+  font-size: var(--body-md-size);
+  line-height: 1.5;
+  color: var(--fg-1);
+  margin: 0;
+}
+
+a {
+  color: var(--fg-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+a:hover { text-decoration: none; }
+
+small { font-size: var(--body-sm-size); }
+
+/* Utility classes mirroring /styles/typography.css */
+.ingress-md       { font-size: var(--ingress-md-size); font-weight: var(--fw-regular); line-height: 1.5; }
+.ingress-md-bold  { font-size: var(--ingress-md-size); font-weight: var(--fw-semibold); line-height: 1.5; }
+.ingress-sm       { font-size: var(--ingress-sm-size); font-weight: var(--fw-regular); line-height: 1.5; }
+.body-lg          { font-size: var(--body-lg-size); font-weight: var(--fw-regular); line-height: 1.5; }
+.body-lg-semibold { font-size: var(--body-lg-size); font-weight: var(--fw-semibold); line-height: 1.5; }
+.body-md          { font-size: var(--body-md-size); font-weight: var(--fw-regular); line-height: 1.5; }
+.body-md-semibold { font-size: var(--body-md-size); font-weight: var(--fw-semibold); line-height: 1.5; }
+.body-sm          { font-size: var(--body-sm-size); font-weight: var(--fw-regular); line-height: 1.43; }
+.body-sm-semibold { font-size: var(--body-sm-size); font-weight: var(--fw-semibold); line-height: 1.43; }
+.body-xs          { font-size: var(--body-xs-size); font-weight: var(--fw-regular); line-height: 1.4;  }
+
+/* Display headings — used for hero / front page */
+.display-4xl { font-size: var(--display-4xl-size); font-weight: var(--fw-bold); line-height: 1.0;  letter-spacing: -0.03em; color: var(--lasso-heading-frontpage); }
+.display-3xl { font-size: var(--display-3xl-size); font-weight: var(--fw-bold); line-height: 1.05; letter-spacing: -0.025em; color: var(--lasso-heading-frontpage); }
+.display-2xl { font-size: var(--display-2xl-size); font-weight: var(--fw-bold); line-height: 1.05; letter-spacing: -0.02em; color: var(--lasso-heading-frontpage); }
+.display-xl  { font-size: var(--display-xl-size);  font-weight: var(--fw-bold); line-height: 1.1;  letter-spacing: -0.02em; color: var(--lasso-heading-frontpage); }
+
+/* Brand wordmark — tight letter spacing, Lasso navy on light, white on dark */
+.lasso-wordmark {
+  font-family: var(--font-body);
+  font-weight: var(--fw-bold);
+  font-size: 33px;
+  line-height: 1;
+  letter-spacing: -0.072em;
+  color: var(--lasso-text-dark-blue);
+}
+.lasso-wordmark--light { color: var(--white); }
