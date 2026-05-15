@@ -35,24 +35,7 @@ function blockText(value: any): string {
 function HeadingAnchor({ level, children, value }: { level: 2 | 3 | 4; children: React.ReactNode; value: any }) {
   const Tag = `h${level}` as 'h2' | 'h3' | 'h4'
   const id = slugify(blockText(value))
-
-  const sizes: Record<number, string> = { 2: '1.5rem', 3: '1.25rem', 4: '1.1rem' }
-  const margins: Record<number, string> = { 2: '2rem 0 0.75rem', 3: '1.5rem 0 0.5rem', 4: '1.25rem 0 0.4rem' }
-
-  return (
-    <Tag
-      id={id}
-      style={{
-        fontSize: sizes[level],
-        fontWeight: 700,
-        margin: margins[level],
-        color: 'var(--color-text)',
-        scrollMarginTop: 'calc(var(--header-height) + 16px)',
-      }}
-    >
-      {children}
-    </Tag>
-  )
+  return <Tag id={id}>{children}</Tag>
 }
 
 // ── Image / figure ────────────────────────────────────────────────────────────
@@ -160,7 +143,7 @@ const components: PortableTextComponents = {
         fontSize: '0.875em',
         background: 'var(--color-surface)',
         border: '1px solid var(--color-border)',
-        fontFamily: 'ui-monospace, monospace',
+        fontFamily: 'var(--font-mono), ui-monospace, monospace',
       }}>
         {children}
       </code>
@@ -218,7 +201,7 @@ const components: PortableTextComponents = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ArticleBody({ body }: { body: any[] }): React.JSX.Element {
   return (
-    <div style={{ maxWidth: '72ch' }}>
+    <div className="prose">
       <PortableText value={body} components={components} />
     </div>
   )

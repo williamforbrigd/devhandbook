@@ -42,8 +42,10 @@ function normaliseLang(lang: string | null | undefined): string {
 
 // ── Theme map (light / dark) ──────────────────────────────────────────────────
 
-const LIGHT_THEME = 'github-light'
-const DARK_THEME = 'github-dark'
+import { handbookLight, handbookDark } from '../../lib/shikiThemes'
+
+const LIGHT_THEME = handbookLight
+const DARK_THEME = handbookDark
 
 // ── Server component ──────────────────────────────────────────────────────────
 

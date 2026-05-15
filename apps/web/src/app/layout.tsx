@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Inter, JetBrains_Mono } from 'next/font/google'
 import { draftMode } from 'next/headers'
 import { VisualEditing } from 'next-sanity'
 import { Header } from '../components/layout/Header'
@@ -9,6 +10,18 @@ import { TocProvider } from '../components/layout/TocContext'
 import { fetchNavigation, fetchExpertises } from '../lib/queries'
 import { SanityLive } from '../lib/live'
 import './globals.css'
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Handbook',
@@ -27,7 +40,7 @@ export default async function RootLayout({
   ])
 
   return (
-    <html lang="no" suppressHydrationWarning>
+    <html lang="no" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
         {/* Inline script: apply dark class before paint to prevent flash */}
         <script
