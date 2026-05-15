@@ -40,7 +40,7 @@ export default async function RootLayout({
   ])
 
   return (
-    <html lang="no" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="no" suppressHydrationWarning data-scroll-behavior="smooth" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
         {/* Inline script: apply dark class before paint to prevent flash */}
         <script
