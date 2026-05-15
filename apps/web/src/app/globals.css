@@ -96,3 +96,15 @@ body {
   user-select: none;
 }
 
+/* ── HotspotFigure ─────────────────────────────────────────────────────────── */
+@keyframes hf-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(99, 102, 241, 0.55); }
+  70%  { box-shadow: 0 0 0 9px rgba(99, 102, 241, 0);    }
+  100% { box-shadow: 0 0 0 0   rgba(99, 102, 241, 0);    }
+}
+
+@keyframes hf-sheet-in {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0);    }
+}
+

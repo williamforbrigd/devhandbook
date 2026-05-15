@@ -3,6 +3,17 @@ import type { PortableTextComponents } from '@portabletext/react'
 import { CodeBlock } from '../portable-text/CodeBlock'
 import { CodeGroup } from '../portable-text/CodeGroup'
 import { Callout } from '../portable-text/Callout'
+import { DecisionRecord } from '../portable-text/DecisionRecord'
+import { InternalLink } from '../portable-text/InternalLink'
+import { GlossaryRef } from '../portable-text/GlossaryRef'
+import { Embed } from '../portable-text/Embed'
+import { SkillEmbed } from '../portable-text/SkillEmbed'
+import { SkillRef } from '../portable-text/SkillRef'
+import { DiagramBlock } from '../portable-text/DiagramBlock'
+import { HotspotFigure } from '../portable-text/HotspotFigure'
+import { ConceptModel } from '../portable-text/ConceptModel'
+import { Checklist } from '../portable-text/Checklist'
+import { StepList } from '../portable-text/StepList'
 
 // ── Heading with anchor ───────────────────────────────────────────────────────
 
@@ -15,10 +26,15 @@ function slugify(text: string): string {
     .trim()
 }
 
-function HeadingAnchor({ level, children }: { level: 2 | 3 | 4; children: React.ReactNode }) {
+// Extract plain text from a raw Sanity block's children spans
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function blockText(value: any): string {
+  return (value?.children ?? []).map((s: { text?: string }) => s.text ?? '').join('')
+}
+
+function HeadingAnchor({ level, children, value }: { level: 2 | 3 | 4; children: React.ReactNode; value: any }) {
   const Tag = `h${level}` as 'h2' | 'h3' | 'h4'
-  const text = typeof children === 'string' ? children : ''
-  const id = slugify(text)
+  const id = slugify(blockText(value))
 
   const sizes: Record<number, string> = { 2: '1.5rem', 3: '1.25rem', 4: '1.1rem' }
   const margins: Record<number, string> = { 2: '2rem 0 0.75rem', 3: '1.5rem 0 0.5rem', 4: '1.25rem 0 0.4rem' }
@@ -62,19 +78,6 @@ function Figure({ value }: { value: any }) {
   )
 }
 
-// ── Diagram (mermaid — render as code block for now, live preview in studio) ──
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function DiagramBlock({ value }: { value: any }) {
-  return (
-    <div style={{ margin: '1.25rem 0', padding: '16px', background: 'var(--color-bg-subtle)', borderRadius: 8, border: '1px solid var(--color-border)' }}>
-      <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 8 }}>Diagram (Mermaid)</div>
-      <pre style={{ margin: 0, fontSize: 12, fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
-        {value?.code ?? ''}
-      </pre>
-    </div>
-  )
-}
 
 // ── Table ────────────────────────────────────────────────────────────────────
 
@@ -117,9 +120,9 @@ function TableBlock({ value }: { value: any }) {
 
 const components: PortableTextComponents = {
   block: {
-    h2: ({ children }) => <HeadingAnchor level={2}>{children}</HeadingAnchor>,
-    h3: ({ children }) => <HeadingAnchor level={3}>{children}</HeadingAnchor>,
-    h4: ({ children }) => <HeadingAnchor level={4}>{children}</HeadingAnchor>,
+    h2: ({ children, value }) => <HeadingAnchor level={2} value={value}>{children}</HeadingAnchor>,
+    h3: ({ children, value }) => <HeadingAnchor level={3} value={value}>{children}</HeadingAnchor>,
+    h4: ({ children, value }) => <HeadingAnchor level={4} value={value}>{children}</HeadingAnchor>,
     normal: ({ children }) => (
       <p style={{ margin: '0 0 1rem', lineHeight: 1.75, color: 'var(--color-text)' }}>{children}</p>
     ),
@@ -172,14 +175,39 @@ const components: PortableTextComponents = {
         {children}
       </a>
     ),
+    externalLink: ({ value, children }) => (
+      <a
+        href={value?.url ?? '#'}
+        target={value?.newTab !== false ? '_blank' : undefined}
+        rel="noopener noreferrer"
+        style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
+      >
+        {children}
+      </a>
+    ),
+    internalLink: ({ value, children }) => (
+      <InternalLink value={value}>{children}</InternalLink>
+    ),
+    glossaryRef: ({ value, children }) => (
+      <GlossaryRef value={value}>{children}</GlossaryRef>
+    ),
+    skillRef: ({ value, children }) => (
+      <SkillRef value={value}>{children}</SkillRef>
+    ),
   },
   types: {
+    'hb.embed':           Embed,
+    'hb.skillEmbed':      SkillEmbed,
     'hb.codeBlock':       CodeBlock,
     'hb.codeGroup':       CodeGroup,
     'hb.callout':         Callout,
+    'hb.decisionRecord':  DecisionRecord,
     'hb.figure':          Figure,
     'hb.diagramBlock':    DiagramBlock,
-    'hb.hotspotFigure':   Figure,
+    'hb.hotspotFigure':   HotspotFigure,
+    'hb.conceptModel':    ConceptModel,
+    'hb.checklist':       Checklist,
+    'hb.stepList':        StepList,
     'hb.table':           TableBlock,
     image:                Figure,
   },

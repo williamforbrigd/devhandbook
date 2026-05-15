@@ -141,7 +141,51 @@ export const articleQuery = `*[_type == "hb.article"
     "slug": slug.current,
     "section": section->{"slug": slug.current}
   },
-  body
+  "body": body[]{
+    ...,
+    _type == "hb.hotspotFigure" => {
+      ...,
+      "imageUrl": image.asset->url
+    },
+    _type == "hb.skillEmbed" => {
+      "skill": skill->{
+        _id, title,
+        "slug": slug.current,
+        summary, skillType, maturity,
+        "promptArtifact": promptArtifact{
+          "systemPrompt": systemPrompt.code,
+          "userPromptTemplate": userPromptTemplate.code,
+          variables[]{ name, description, example }
+        },
+        "workflowArtifact": workflowArtifact{
+          steps[]{ title, prompt, expectedOutput, notes }
+        },
+        "evaluationArtifact": evaluationArtifact{
+          criteria[]{ label, description, scoringGuide }
+        }
+      }
+    },
+    markDefs[]{
+      ...,
+      _type == "internalLink" => {
+        ...,
+        "article": article->{
+          _id,
+          title,
+          "slug": slug.current,
+          "section": section->{"slug": slug.current}
+        }
+      },
+      _type == "glossaryRef" => {
+        ...,
+        "term": term->{_id, term, "slug": slug.current, definition}
+      },
+      _type == "skillRef" => {
+        ...,
+        "skill": skill->{_id, title, "slug": slug.current}
+      }
+    }
+  }
 }`
 
 export const articleBySlugQuery = articleQuery
