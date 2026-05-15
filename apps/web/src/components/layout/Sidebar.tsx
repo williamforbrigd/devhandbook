@@ -4,18 +4,18 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Icon } from '../ui/Icon'
+import { APP_VERSION_LABEL } from '../../lib/version'
 import type { NavGroup, NavItem, Expertise, NavigationData } from '../../lib/queries'
 
 // ── Brand block (top of sidebar) ──────────────────────────────────────────────
 
 function SidebarBrand(): React.JSX.Element {
   return (
-    <div className="hb-side__brand">
+    <div className="hb-side__brand" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
       <Link href="/" className="hb-side__wordmark" aria-label="Dev Handbook home">
-        <Icon name="bookOpen" size={18} />
         <span>Handbook</span>
       </Link>
-      <div className="hb-side__sub">Internal POC</div>
+      <div className="hb-side__sub">Internal {APP_VERSION_LABEL}</div>
     </div>
   )
 }

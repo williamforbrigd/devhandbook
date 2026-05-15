@@ -9,6 +9,7 @@ import { ThemeProvider } from '../components/layout/ThemeProvider'
 import { TocProvider } from '../components/layout/TocContext'
 import { fetchNavigation, fetchExpertises } from '../lib/queries'
 import { SanityLive } from '../lib/live'
+import { APP_VERSION_LABEL } from '../lib/version'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -53,7 +54,7 @@ export default async function RootLayout({
                   <Breadcrumb />
                   <div className="hb-main__inner">{children}</div>
                   <footer className="hb-foot">
-                    <span>Internal POC · Dev Handbook</span>
+                    <span>Internal POC · Dev Handbook · {APP_VERSION_LABEL}</span>
                   </footer>
                 </div>
 
