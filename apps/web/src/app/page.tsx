@@ -52,6 +52,7 @@ export default async function Home(): Promise<React.JSX.Element> {
         <>
           <div className="hb-sectitle">
             <h2>Browse by area</h2>
+            <Link href="/sections">All sections →</Link>
           </div>
           <div className="hb-secgrid">
             {sections.map((s) => {
