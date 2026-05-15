@@ -1,4 +1,5 @@
 import { sanityFetch } from './live'
+import { client } from './sanity'
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
@@ -140,7 +141,51 @@ export const articleQuery = `*[_type == "hb.article"
     "slug": slug.current,
     "section": section->{"slug": slug.current}
   },
-  body
+  "body": body[]{
+    ...,
+    _type == "hb.hotspotFigure" => {
+      ...,
+      "imageUrl": image.asset->url
+    },
+    _type == "hb.skillEmbed" => {
+      "skill": skill->{
+        _id, title,
+        "slug": slug.current,
+        summary, skillType, maturity,
+        "promptArtifact": promptArtifact{
+          "systemPrompt": systemPrompt.code,
+          "userPromptTemplate": userPromptTemplate.code,
+          variables[]{ name, description, example }
+        },
+        "workflowArtifact": workflowArtifact{
+          steps[]{ title, prompt, expectedOutput, notes }
+        },
+        "evaluationArtifact": evaluationArtifact{
+          criteria[]{ label, description, scoringGuide }
+        }
+      }
+    },
+    markDefs[]{
+      ...,
+      _type == "internalLink" => {
+        ...,
+        "article": article->{
+          _id,
+          title,
+          "slug": slug.current,
+          "section": section->{"slug": slug.current}
+        }
+      },
+      _type == "glossaryRef" => {
+        ...,
+        "term": term->{_id, term, "slug": slug.current, definition}
+      },
+      _type == "skillRef" => {
+        ...,
+        "skill": skill->{_id, title, "slug": slug.current}
+      }
+    }
+  }
 }`
 
 export const articleBySlugQuery = articleQuery
@@ -159,7 +204,9 @@ export const allArticleParamsQuery = `*[_type == "hb.article" && hidden != true 
 }`
 
 export async function fetchAllArticleParams(): Promise<{ section: string; slug: string }[]> {
-  const { data } = await sanityFetch({ query: allArticleParamsQuery })
+  // Must use the base client — sanityFetch calls draftMode() which requires a request scope,
+  // but generateStaticParams runs at build time outside any request.
+  const data = await client.fetch(allArticleParamsQuery)
   return (data as { section: string; slug: string }[]) ?? []
 }
 

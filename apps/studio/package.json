@@ -6,7 +6,6 @@
     "dev": "sanity dev",
     "build": "sanity build",
     "start": "sanity start",
-    "predev": "pnpm typegen",
     "prebuild": "pnpm typegen",
     "typegen": "sanity schema extract && sanity typegen generate",
     "typegen:watch": "sanity typegen generate --watch"
