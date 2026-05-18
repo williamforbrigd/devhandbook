@@ -13,172 +13,62 @@ interface Hotspot {
   content?: string
 }
 
-// ── Close button ──────────────────────────────────────────────────────────────
-
-function CloseButton({ onClose }: { onClose: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClose}
-      aria-label="Lukk"
-      style={{
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        width: 24,
-        height: 24,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 4,
-        border: '1px solid var(--color-border)',
-        background: 'var(--color-bg-subtle, #f6f8fa)',
-        cursor: 'pointer',
-        fontSize: 14,
-        lineHeight: 1,
-        color: 'var(--color-text-muted)',
-        padding: 0,
-      }}
-    >
-      ×
-    </button>
-  )
-}
-
-// ── Hotspot dot button ────────────────────────────────────────────────────────
+// ── Hotspot dot + (desktop) inline popover ────────────────────────────────────
 
 function HotspotDot({
   hotspot,
   index,
   isActive,
+  showPopover,
   onToggle,
+  buttonRef,
 }: {
   hotspot: Hotspot
   index: number
   isActive: boolean
+  showPopover: boolean
   onToggle: () => void
+  buttonRef?: React.Ref<HTMLButtonElement>
 }) {
+  // State suffix maps onto `.hb-hot--{state}` from the design system.
+  // - default: inactive dot with the pulsing accent ring
+  // - active:  the currently selected dot
+  const stateClass = isActive ? 'hb-hot--active' : 'hb-hot--default'
+  // Flip the popover above the dot when the hotspot sits in the lower half of
+  // the image, so it stays inside the figure bounds.
+  const flipClass = hotspot.y > 60 ? ' hb-hot--flip' : ''
+
   return (
     <button
+      ref={buttonRef}
       type="button"
       aria-label={hotspot.label ?? `Hotspot ${index + 1}`}
       aria-expanded={isActive}
       aria-haspopup="dialog"
       onClick={onToggle}
-      style={{
-        position: 'absolute',
-        left: `${hotspot.x}%`,
-        top: `${hotspot.y}%`,
-        transform: 'translate(-50%, -50%)',
-        width: 28,
-        height: 28,
-        borderRadius: '50%',
-        background: isActive ? '#4f46e5' : '#6366f1',
-        border: '2.5px solid #fff',
-        cursor: 'pointer',
-        boxShadow: isActive
-          ? '0 0 0 3px rgba(99,102,241,0.35)'
-          : '0 1px 4px rgba(0,0,0,0.25)',
-        animation: isActive ? 'none' : 'hf-pulse 2.4s ease-in-out infinite',
-        zIndex: 2,
-        padding: 0,
-        outline: 'none',
-        transition: 'background 0.15s, box-shadow 0.15s',
-      }}
+      className={`hb-hot ${stateClass}${flipClass}`}
+      style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
     >
-      <span
-        aria-hidden
-        style={{
-          display: 'block',
-          textAlign: 'center',
-          color: '#fff',
-          fontSize: 11,
-          fontWeight: 700,
-          lineHeight: '24px',
-        }}
-      >
-        {index + 1}
-      </span>
-    </button>
-  )
-}
+      <span className="hb-hot__pulse" aria-hidden="true" />
+      <span className="hb-hot__dot">{index + 1}</span>
 
-// ── Desktop floating popover ──────────────────────────────────────────────────
-
-function Popover({
-  hotspot,
-  onClose,
-  firstFocusRef,
-}: {
-  hotspot: Hotspot
-  onClose: () => void
-  firstFocusRef: React.RefObject<HTMLButtonElement | null>
-}) {
-  // Flip vertically: open above if hotspot is in lower 55% of image
-  const openAbove = hotspot.y > 55
-  // Clamp X so card doesn't go off-screen edges (assume 240px card)
-  const clampedX = Math.min(Math.max(hotspot.x, 18), 82)
-
-  return (
-    <div
-      role="dialog"
-      aria-modal={false}
-      aria-label={hotspot.label ?? 'Hotspot'}
-      style={{
-        position: 'absolute',
-        left: `${clampedX}%`,
-        top: openAbove
-          ? `calc(${hotspot.y}% - 18px)`
-          : `calc(${hotspot.y}% + 18px)`,
-        transform: openAbove ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
-        zIndex: 10,
-        width: 240,
-        background: 'var(--color-surface, #fff)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 8,
-        boxShadow: '0 6px 20px rgba(0,0,0,0.14)',
-        padding: '12px 14px',
-        fontSize: 13,
-        lineHeight: 1.55,
-        color: 'var(--color-text)',
-      }}
-    >
-      <CloseButton onClose={onClose} />
-      {hotspot.label && (
-        <div style={{ fontWeight: 700, marginBottom: hotspot.content ? 5 : 0, paddingRight: 24, fontSize: 13 }}>
-          {hotspot.label}
-        </div>
-      )}
-      {hotspot.content && (
-        <p style={{ margin: 0, color: 'var(--color-text-muted)' }}>{hotspot.content}</p>
-      )}
-      {/* Small caret */}
-      <span
-        aria-hidden
-        style={{
-          position: 'absolute',
-          left: '50%',
-          [openAbove ? 'bottom' : 'top']: -7,
-          transform: 'translateX(-50%)',
-          width: 12,
-          height: 7,
-          overflow: 'hidden',
-          display: 'block',
-        }}
-      >
+      {/* Desktop popover — only rendered when this dot is the active one and
+          we're on desktop. The design CSS positions this below the dot. */}
+      {showPopover && isActive && (
         <span
-          style={{
-            display: 'block',
-            width: 10,
-            height: 10,
-            background: 'var(--color-surface, #fff)',
-            border: '1px solid var(--color-border)',
-            transform: openAbove ? 'rotate(45deg) translate(-1px, -5px)' : 'rotate(45deg) translate(-1px, 3px)',
-            marginLeft: 1,
-          }}
-        />
-      </span>
-    </div>
+          className="hb-hot__pop"
+          role="dialog"
+          aria-label={hotspot.label ?? `Hotspot ${index + 1}`}
+        >
+          {hotspot.label && (
+            <span className="hb-hot__poptitle">{hotspot.label}</span>
+          )}
+          {hotspot.content && (
+            <span className="hb-hot__popbody">{hotspot.content}</span>
+          )}
+        </span>
+      )}
+    </button>
   )
 }
 
@@ -199,11 +89,12 @@ function BottomSheet({
   onPrev: () => void
   onNext: () => void
 }) {
+  // Backdrop + sheet. The `.hb-bsheet` design class is position:absolute, so
+  // we promote it to a fixed-position overlay here.
   return (
     <>
-      {/* Backdrop */}
       <div
-        aria-hidden
+        aria-hidden="true"
         onClick={onClose}
         style={{
           position: 'fixed',
@@ -212,66 +103,59 @@ function BottomSheet({
           zIndex: 40,
         }}
       />
-      {/* Sheet */}
       <div
         role="dialog"
-        aria-modal
-        aria-label={hotspot.label ?? 'Hotspot'}
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          background: 'var(--color-surface, #fff)',
-          borderRadius: '16px 16px 0 0',
-          padding: '20px 20px 32px',
-          boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
-          animation: 'hf-sheet-in 0.22s ease-out',
-        }}
+        aria-modal="true"
+        aria-label={hotspot.label ?? `Hotspot ${index + 1}`}
+        className="hb-bsheet"
+        style={{ position: 'fixed', zIndex: 50 }}
       >
-        {/* Drag handle */}
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--color-border)', margin: '0 auto 16px' }} aria-hidden />
+        <div className="hb-bsheet__handle" aria-hidden="true" />
 
-        <CloseButton onClose={onClose} />
-
-        {/* Counter */}
-        <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginBottom: 8 }}>
-          {index + 1} / {total}
+        <div className="hb-bsheet__title">
+          {index + 1} · {hotspot.label ?? `Hotspot ${index + 1}`}
         </div>
-
-        {hotspot.label && (
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: hotspot.content ? 8 : 0 }}>
-            {hotspot.label}
-          </div>
-        )}
         {hotspot.content && (
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: 'var(--color-text-muted)' }}>
-            {hotspot.content}
-          </p>
+          <div className="hb-bsheet__body">{hotspot.content}</div>
         )}
 
-        {/* Prev / Next nav */}
-        {total > 1 && (
-          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-            <button
-              type="button"
-              onClick={onPrev}
-              disabled={index === 0}
-              style={{ flex: 1, padding: '8px 0', borderRadius: 8, border: '1px solid var(--color-border)', background: 'transparent', cursor: index === 0 ? 'not-allowed' : 'pointer', opacity: index === 0 ? 0.35 : 1, fontSize: 13 }}
-            >
-              ← Forrige
-            </button>
-            <button
-              type="button"
-              onClick={onNext}
-              disabled={index === total - 1}
-              style={{ flex: 1, padding: '8px 0', borderRadius: 8, border: '1px solid var(--color-border)', background: 'transparent', cursor: index === total - 1 ? 'not-allowed' : 'pointer', opacity: index === total - 1 ? 0.35 : 1, fontSize: 13 }}
-            >
-              Neste →
-            </button>
-          </div>
-        )}
+        <div className="hb-bsheet__nav">
+          <button
+            type="button"
+            onClick={onPrev}
+            disabled={index === 0}
+            className="hb-icon-btn"
+            style={{
+              width: 'auto',
+              padding: '6px 10px',
+              fontSize: 12,
+              opacity: index === 0 ? 0.35 : 1,
+              cursor: index === 0 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            ← Forrige
+          </button>
+          <span style={{ flex: 1 }} />
+          <span style={{ fontSize: 11, color: 'var(--hb-fg-3)' }}>
+            {index + 1} / {total}
+          </span>
+          <span style={{ flex: 1 }} />
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={index === total - 1}
+            className="hb-icon-btn"
+            style={{
+              width: 'auto',
+              padding: '6px 10px',
+              fontSize: 12,
+              opacity: index === total - 1 ? 0.35 : 1,
+              cursor: index === total - 1 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            Neste →
+          </button>
+        </div>
       </div>
     </>
   )
@@ -284,7 +168,7 @@ export function HotspotFigure({ value }: { value: any }): React.JSX.Element | nu
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
   const [imageFailed, setImageFailed] = useState(false)
-  const firstFocusRef = useRef<HTMLButtonElement | null>(null)
+  const activeButtonRef = useRef<HTMLButtonElement | null>(null)
 
   const imageUrl: string = value?.imageUrl ?? ''
   const alt: string = value?.alt ?? ''
@@ -300,11 +184,14 @@ export function HotspotFigure({ value }: { value: any }): React.JSX.Element | nu
     return () => mq.removeEventListener('change', update)
   }, [])
 
-  // Close on Escape
+  // Close on Escape and return focus to the dot
   useEffect(() => {
     if (activeIndex === null) return
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setActiveIndex(null)
+      if (e.key === 'Escape') {
+        setActiveIndex(null)
+        activeButtonRef.current?.focus()
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -315,7 +202,10 @@ export function HotspotFigure({ value }: { value: any }): React.JSX.Element | nu
     [],
   )
   const close = useCallback(() => setActiveIndex(null), [])
-  const prev = useCallback(() => setActiveIndex((i) => (i !== null && i > 0 ? i - 1 : i)), [])
+  const prev = useCallback(
+    () => setActiveIndex((i) => (i !== null && i > 0 ? i - 1 : i)),
+    [],
+  )
   const next = useCallback(
     () => setActiveIndex((i) => (i !== null && i < hotspots.length - 1 ? i + 1 : i)),
     [hotspots.length],
@@ -323,14 +213,16 @@ export function HotspotFigure({ value }: { value: any }): React.JSX.Element | nu
 
   if (!imageUrl) return null
 
-  // Image failed to load → render design-system error fallback instead of a
-  // broken image. Caption is suppressed so the placeholder communicates the
-  // problem on its own.
+  // Image failed to load → render design-system error fallback.
   if (imageFailed) {
     return (
       <figure className="hb-hotspots">
         <div className="hb-hotspots__canvas">
-          <div className="hb-hotspots__imgerr" role="img" aria-label={alt || caption || 'Bildet kunne ikke lastes'}>
+          <div
+            className="hb-hotspots__imgerr"
+            role="img"
+            aria-label={alt || caption || 'Bildet kunne ikke lastes'}
+          >
             <Icon name="imageOff" size={28} />
             <span>{alt || caption || 'Bildet kunne ikke lastes'}</span>
           </div>
@@ -339,18 +231,23 @@ export function HotspotFigure({ value }: { value: any }): React.JSX.Element | nu
     )
   }
 
-  const activeHotspot = activeIndex !== null ? hotspots[activeIndex] : null
+  const activeHotspot =
+    activeIndex !== null ? hotspots[activeIndex] ?? null : null
 
   return (
-    <figure style={{ margin: '1.5rem 0' }}>
-      {/* Image + hotspot dots */}
-      <div style={{ position: 'relative', display: 'block', lineHeight: 0 }}>
+    <figure className="hb-hotspots">
+      <div className="hb-hotspots__canvas">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imageUrl}
           alt={alt}
           onError={() => setImageFailed(true)}
-          style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 8, border: '1px solid var(--color-border)' }}
+          style={{
+            width: '100%',
+            height: 'auto',
+            display: 'block',
+            borderRadius: 4,
+          }}
         />
 
         {hotspots.map((hs, i) => (
@@ -359,45 +256,27 @@ export function HotspotFigure({ value }: { value: any }): React.JSX.Element | nu
             hotspot={hs}
             index={i}
             isActive={activeIndex === i}
+            showPopover={!isMobile}
             onToggle={() => toggle(i)}
+            buttonRef={activeIndex === i ? activeButtonRef : undefined}
           />
         ))}
 
-        {/* Desktop popover — rendered inside the relative container */}
-        {!isMobile && activeHotspot && activeIndex !== null && (
-          <Popover
+        {/* Mobile bottom sheet — rendered outside the dot button so it can be
+            a fullscreen overlay. */}
+        {isMobile && activeHotspot && activeIndex !== null && (
+          <BottomSheet
             hotspot={activeHotspot}
+            index={activeIndex}
+            total={hotspots.length}
             onClose={close}
-            firstFocusRef={firstFocusRef}
+            onPrev={prev}
+            onNext={next}
           />
         )}
       </div>
 
-      {/* Mobile bottom sheet — rendered outside container so it can be fixed */}
-      {isMobile && activeHotspot && activeIndex !== null && (
-        <BottomSheet
-          hotspot={activeHotspot}
-          index={activeIndex}
-          total={hotspots.length}
-          onClose={close}
-          onPrev={prev}
-          onNext={next}
-        />
-      )}
-
-      {caption && (
-        <figcaption
-          style={{
-            marginTop: 8,
-            fontSize: 13,
-            color: 'var(--color-text-muted)',
-            textAlign: 'center',
-            lineHeight: 1.5,
-          }}
-        >
-          {caption}
-        </figcaption>
-      )}
+      {caption && <figcaption className="hb-hotspots__cap">{caption}</figcaption>}
     </figure>
   )
 }

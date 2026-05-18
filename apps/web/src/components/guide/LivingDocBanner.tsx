@@ -4,6 +4,9 @@ import { Icon } from '../ui/Icon'
 /**
  * Banner shown on guides marked as a living document — communicates that the
  * content evolves and invites contribution.
+ *
+ * Uses the shared `.hb-artbanner--living` design-system variant so it sits
+ * alongside the exploratory/deprecated article banners.
  */
 export function LivingDocBanner({
   title = 'Levende dokument.',
@@ -13,13 +16,12 @@ export function LivingDocBanner({
   message?: string
 }): React.JSX.Element {
   return (
-    <div className="hb-livingdoc" role="note">
-      <span className="hb-livingdoc__icon" aria-hidden="true">
-        <Icon name="edit" size={14} />
-      </span>
-      <span>
-        <strong>{title}</strong> {message}
-      </span>
+    <div className="hb-artbanner hb-artbanner--living" role="note">
+      <Icon name="edit" size={16} />
+      <div className="hb-artbanner__body">
+        <strong>{title}</strong>
+        <span>{message}</span>
+      </div>
     </div>
   )
 }

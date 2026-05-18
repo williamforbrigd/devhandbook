@@ -627,6 +627,17 @@ a.hb-crumb__step:hover { background: var(--hb-bg-tinted); }
 .hb.hb--dark .hb-seccard::before { background: #4a4684; }
 .hb.hb--dark .hb-seccard--elevated::before { background: #c9c4ff; }
 
+.hb-seccard__icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--hb-bg-tinted);
+  border: 1px solid var(--hb-border);
+  color: var(--hb-accent);
+  margin-bottom: 4px;
+}
+.hb-seccard__icon svg { stroke: currentColor; fill: none; stroke-width: 2; display: block; }
+
 .hb-seccard__title {
   font-family: var(--font-display, var(--font-body));
   font-size: 18px; font-weight: 700; color: var(--hb-fg-title);
@@ -634,7 +645,8 @@ a.hb-crumb__step:hover { background: var(--hb-bg-tinted); }
 }
 .hb-seccard__desc { font-size: 14px; color: var(--hb-fg-2); line-height: 1.5; }
 .hb-seccard__foot {
-  margin-top: 10px;
+  margin-top: auto;
+  padding-top: 10px;
   display: flex; align-items: center; justify-content: space-between;
   font-size: 13px;
 }
@@ -1016,6 +1028,16 @@ a.hb-crumb__step:hover { background: var(--hb-bg-tinted); }
   background: var(--hb-bg);
   border-left: 1px solid var(--hb-border-strong);
   border-top: 1px solid var(--hb-border-strong);
+}
+/* Flip popover above the dot for hotspots in the lower half of the figure. */
+.hb-hot--flip .hb-hot__pop {
+  top: auto; bottom: calc(100% + 14px);
+}
+.hb-hot--flip .hb-hot__pop::before {
+  top: auto; bottom: -7px;
+  border-left: none; border-top: none;
+  border-right: 1px solid var(--hb-border-strong);
+  border-bottom: 1px solid var(--hb-border-strong);
 }
 .hb-hot__poptitle { font-size: 13px; font-weight: 700; color: var(--hb-fg-title); }
 .hb-hot__popbody { font-size: 12.5px; line-height: 1.5; color: var(--hb-fg-2); }

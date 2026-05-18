@@ -51,11 +51,9 @@ export default async function Home(): Promise<React.JSX.Element> {
                   className="hb-seccard"
                   style={{ textDecoration: 'none', color: 'inherit' }}
                 >
-                  {s.icon && (
-                    <span className="hb-seccard__icon">
-                      <Icon name={s.icon} size={20} />
-                    </span>
-                  )}
+                  <span className="hb-seccard__icon">
+                    <Icon name={s.icon ?? 'folder'} size={20} />
+                  </span>
                   <div className="hb-seccard__title">{s.title}</div>
                   {s.description && <div className="hb-seccard__desc">{s.description}</div>}
                   <div className="hb-seccard__foot">
