@@ -55,6 +55,7 @@ const PATHS: Record<string, React.ReactNode> = {
   play: <polygon points="5 3 19 12 5 21 5 3" />,
   hash: <><line x1="4" x2="20" y1="9" y2="9" /><line x1="4" x2="20" y1="15" y2="15" /><line x1="10" x2="8" y1="3" y2="21" /><line x1="16" x2="14" y1="3" y2="21" /></>,
   bookmark: <path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />,
+  clock: <><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></>,
 }
 
 export type IconName = keyof typeof PATHS | string

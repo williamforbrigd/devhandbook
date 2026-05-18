@@ -3,20 +3,8 @@ import Link from 'next/link'
 import { fetchAllSectionsWithCounts, fetchRecentArticles } from '../lib/queries'
 import { SearchTrigger } from '../components/layout/SearchTrigger'
 import { Icon } from '../components/ui/Icon'
+import { ArticleCard } from '../components/article/ArticleCard'
 import { APP_VERSION_LABEL } from '../lib/version'
-
-const dateFormatter = new Intl.DateTimeFormat('nb-NO', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-})
-
-function formatDate(iso: string | null): string {
-  if (!iso) return ''
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return ''
-  return dateFormatter.format(d)
-}
 
 function articleCount(n: number): string {
   return `${n} ${n === 1 ? 'artikkel' : 'artikler'}`
@@ -90,34 +78,9 @@ export default async function Home(): Promise<React.JSX.Element> {
             <h2>Recently updated</h2>
           </div>
           <div className="hb-related-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-            {recent.map((r) => {
-              const sectionSlug = r.section?.slug
-              const sectionTitle = r.section?.title ?? ''
-              const expertises = r.expertises ?? []
-              const href = sectionSlug ? `/${sectionSlug}/${r.slug}` : `/${r.slug}`
-              return (
-                <Link
-                  key={r._id}
-                  href={href}
-                  className="hb-card"
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
-                  <div className="hb-card__top">
-                    <span className="hb-card__section">{sectionTitle}</span>
-                  </div>
-                  <h3 className="hb-card__title">{r.title}</h3>
-                  {r.summary && <p className="hb-card__summary">{r.summary}</p>}
-                  <div className="hb-card__foot">
-                    <div className="hb-card__chips">
-                      {expertises.slice(0, 2).map((e) => (
-                        <span key={e.slug} className="hb-card__chip">{e.title}</span>
-                      ))}
-                    </div>
-                    {r.date && <span>{formatDate(r.date)}</span>}
-                  </div>
-                </Link>
-              )
-            })}
+            {recent.map((r) => (
+              <ArticleCard key={r._id} article={r} />
+            ))}
           </div>
         </>
       )}

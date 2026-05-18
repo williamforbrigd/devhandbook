@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { Icon } from '../ui/Icon'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -282,6 +283,7 @@ function BottomSheet({
 export function HotspotFigure({ value }: { value: any }): React.JSX.Element | null {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [imageFailed, setImageFailed] = useState(false)
   const firstFocusRef = useRef<HTMLButtonElement | null>(null)
 
   const imageUrl: string = value?.imageUrl ?? ''
@@ -321,6 +323,22 @@ export function HotspotFigure({ value }: { value: any }): React.JSX.Element | nu
 
   if (!imageUrl) return null
 
+  // Image failed to load → render design-system error fallback instead of a
+  // broken image. Caption is suppressed so the placeholder communicates the
+  // problem on its own.
+  if (imageFailed) {
+    return (
+      <figure className="hb-hotspots">
+        <div className="hb-hotspots__canvas">
+          <div className="hb-hotspots__imgerr" role="img" aria-label={alt || caption || 'Bildet kunne ikke lastes'}>
+            <Icon name="imageOff" size={28} />
+            <span>{alt || caption || 'Bildet kunne ikke lastes'}</span>
+          </div>
+        </div>
+      </figure>
+    )
+  }
+
   const activeHotspot = activeIndex !== null ? hotspots[activeIndex] : null
 
   return (
@@ -331,6 +349,7 @@ export function HotspotFigure({ value }: { value: any }): React.JSX.Element | nu
         <img
           src={imageUrl}
           alt={alt}
+          onError={() => setImageFailed(true)}
           style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 8, border: '1px solid var(--color-border)' }}
         />
 

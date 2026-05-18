@@ -57,7 +57,19 @@ export default async function SectionPage({
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {group.map((article) => (
-                <ArticleCard key={article._id} article={article} section={section} />
+                <ArticleCard
+                  key={article._id}
+                  article={{
+                    _id: article._id,
+                    title: article.title,
+                    slug: article.slug,
+                    summary: article.summary,
+                    maturity: article.maturity,
+                    expertises: article.expertises,
+                    date: article.lastVerifiedAt,
+                    section: { title: sectionData.title, slug: section },
+                  }}
+                />
               ))}
             </div>
           </section>

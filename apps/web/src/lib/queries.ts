@@ -107,7 +107,7 @@ export interface ArticleData {
   expertises: { _id: string; title: string; slug: string }[]
   contributors: Contributor[]
   supersededBy: { title: string; slug: string; section: { slug: string } } | null
-  relatedArticles: { _id: string; title: string; slug: string; section: { slug: string }; maturity: Maturity }[]
+  relatedArticles: RelatedArticle[]
   relatedSkills: { _id: string; title: string; slug: string; skillType: string; summary: string | null; maturity: Maturity }[]
   // body is untyped — rendered via @portabletext/react
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -140,8 +140,11 @@ export const articleQuery = `*[_type == "hb.article"
     _id,
     title,
     "slug": slug.current,
-    "section": section->{"slug": slug.current},
-    maturity
+    summary,
+    "section": section->{title, "slug": slug.current},
+    "expertises": expertises[]->{title, "slug": slug.current},
+    maturity,
+    "date": coalesce(lastVerifiedAt, _updatedAt)
   },
   "relatedSkills": relatedSkills[]->{_id, title, "slug": slug.current, skillType, summary, maturity},
   "body": body[]{
@@ -199,8 +202,11 @@ export interface RelatedArticle {
   _id: string
   title: string
   slug: string
-  section: { slug: string }
+  summary: string | null
+  section: { title: string; slug: string }
+  expertises: { title: string; slug: string }[] | null
   maturity: Maturity
+  date: string | null
 }
 
 const relatedArticlesFallbackQuery = `*[
@@ -215,8 +221,11 @@ const relatedArticlesFallbackQuery = `*[
 ][0...$limit]{
   _id, title,
   "slug": slug.current,
-  "section": section->{"slug": slug.current},
-  maturity
+  summary,
+  "section": section->{title, "slug": slug.current},
+  "expertises": expertises[]->{title, "slug": slug.current},
+  maturity,
+  "date": coalesce(lastVerifiedAt, _updatedAt)
 }`
 
 export async function fetchRelatedFallback({

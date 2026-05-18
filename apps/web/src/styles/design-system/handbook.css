@@ -1236,6 +1236,29 @@ a.hb-crumb__step:hover { background: var(--hb-bg-tinted); }
 }
 .hb-search-modal__inputrow input::placeholder { color: var(--hb-fg-3); }
 .hb-search-modal__body { padding: 16px 18px 14px; }
+
+/* ---------- Living-document banner ---------- */
+.hb-livingdoc {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 14px;
+  background: var(--hb-bg-tinted);
+  border: 1px solid var(--hb-border);
+  border-left: 3px solid var(--hb-accent);
+  border-radius: 8px;
+  font-size: 13px; line-height: 1.55;
+  color: var(--hb-fg-2);
+  margin: 16px 0 8px;
+}
+.hb-livingdoc strong { color: var(--hb-fg-title); font-weight: 700; }
+.hb-livingdoc__icon {
+  flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 6px;
+  background: var(--hb-bg); color: var(--hb-accent);
+  border: 1px solid var(--hb-border);
+}
+.hb-livingdoc__icon svg { stroke: currentColor; fill: none; stroke-width: 2; }
+
 .hb-search-modal__soon {
   display: flex; align-items: center; gap: 14px;
   background: var(--hb-bg-tinted);
