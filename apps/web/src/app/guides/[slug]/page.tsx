@@ -3,9 +3,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { fetchGuide, fetchAllGuideParams } from '../../../lib/queries'
 import { guideToMarkdown } from '../../../lib/portableTextToMarkdown'
+import { preprocessBody } from '../../../lib/preprocessBody'
 import { ArticleBody } from '../../../components/article/ArticleBody'
-import { extractTocItems } from '../../../lib/toc'
+import { extractTocItems, estimateReadingMinutes } from '../../../lib/toc'
 import { MaturityBadge } from '../../../components/article/MaturityBadge'
+import { ArticleBanner } from '../../../components/article/ArticleBanner'
 import { CopyMarkdownButtons } from '../../../components/article/CopyMarkdownButtons'
 import { RelatedSkillsSection } from '../../../components/article/RelatedSkillsSection'
 import { TocRegistrar, TableOfContentsMobile } from '../../../components/layout/TocContext'
@@ -61,12 +63,15 @@ export default async function GuidePage({
   if (!guide) notFound()
 
   const tocItems = extractTocItems(guide.body)
+  const readingMinutes = estimateReadingMinutes(guide.body ?? [])
   const expertises = guide.expertises ?? []
   const roles = guide.roles ?? []
   const contributors = guide.contributors ?? []
   const phases = guide.phases ?? []
   const artifacts = (guide.artifacts ?? []).filter((a) => a.url && a.label)
   const related = guide.relatedArticles ?? []
+
+  const body = await preprocessBody(guide.body ?? [])
 
   const markdown = guideToMarkdown(
     {
@@ -84,7 +89,7 @@ export default async function GuidePage({
 
   return (
     <article>
-      <TocRegistrar items={tocItems} />
+      <TocRegistrar items={tocItems} readingMinutes={readingMinutes} />
 
       {tocItems.length > 0 && (
         <div className="show-below-lg">
@@ -143,17 +148,16 @@ export default async function GuidePage({
 
       {/* Deprecated notice */}
       {guide.maturity === 'deprecated' && (
-        <div
-          className="hb-callout hb-callout--deprecated"
-          style={{ marginTop: 24 }}
-          role="note"
-        >
-          <strong>This guide is deprecated.</strong>
-        </div>
+        <ArticleBanner kind="deprecated" />
+      )}
+      {guide.maturity === 'exploratory' && (
+        <ArticleBanner kind="exploratory" />
       )}
 
-      {/* Body */}
-      <ArticleBody body={guide.body ?? []} />
+      {/* Body — dimmed for deprecated guides */}
+      <div style={guide.maturity === 'deprecated' ? { opacity: 0.55 } : undefined}>
+        <ArticleBody body={body} />
+      </div>
 
       {/* Templates / artifacts */}
       {artifacts.length > 0 && (

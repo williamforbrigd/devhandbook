@@ -25,3 +25,19 @@ export function extractTocItems(body: any[]): TocItem[] {
   }
   return items
 }
+
+// Estimate reading time from a portable text body.
+// Counts words in all text-block children; uses 200 wpm (technical reading).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function estimateReadingMinutes(body: any[]): number {
+  if (!Array.isArray(body)) return 1
+  let words = 0
+  for (const block of body) {
+    if (block._type === 'block' && Array.isArray(block.children)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const text = block.children.map((c: any) => c.text ?? '').join(' ')
+      words += text.trim().split(/\s+/).filter(Boolean).length
+    }
+  }
+  return Math.max(1, Math.ceil(words / 200))
+}

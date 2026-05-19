@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export interface TocItem {
   id: string
@@ -8,65 +8,62 @@ export interface TocItem {
   level: 2 | 3
 }
 
-export function TableOfContents({ items }: { items: TocItem[] }): React.JSX.Element | null {
+export function TableOfContents({ items, readingMinutes = 0 }: { items: TocItem[]; readingMinutes?: number }): React.JSX.Element | null {
   const [activeId, setActiveId] = useState<string>('')
-  const observerRef = useRef<IntersectionObserver | null>(null)
 
   useEffect(() => {
     if (items.length === 0) return
 
-    const headings = items
-      .map((item) => document.getElementById(item.id))
-      .filter((el): el is HTMLElement => el !== null)
+    // Approx. sticky header height — headings crossing this threshold are "active".
+    const HEADER_OFFSET = 80
 
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((e) => e.isIntersecting)
-        if (visible.length > 0) {
-          // Pick topmost visible heading
-          const topmost = visible.reduce((a, b) =>
-            a.boundingClientRect.top < b.boundingClientRect.top ? a : b,
-          )
-          setActiveId(topmost.target.id)
+    const onScroll = () => {
+      // Walk headings in order; the last one whose top is at or above
+      // HEADER_OFFSET is the one the reader is currently in.
+      let currentId = items[0]?.id ?? ''
+      for (const item of items) {
+        const el = document.getElementById(item.id)
+        if (el && el.getBoundingClientRect().top <= HEADER_OFFSET) {
+          currentId = item.id
         }
-      },
-      { rootMargin: '-56px 0px -60% 0px', threshold: 0 },
-    )
+      }
+      setActiveId(currentId)
+    }
 
-    headings.forEach((el) => observerRef.current?.observe(el))
-    return () => observerRef.current?.disconnect()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll() // set initial active on mount
+    return () => window.removeEventListener('scroll', onScroll)
   }, [items])
 
   if (items.length === 0) return null
 
   return (
-    <nav aria-label="On this page" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#9ca3af', marginBottom: 8 }}>
-        On this page
+    <nav aria-label="On this page">
+      <p className="hb-toc__title">On this page</p>
+      <div className="hb-toc__list">
+        {items.map((item) => {
+          const isActive = activeId === item.id
+          return (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              onClick={() => setActiveId(item.id)}
+              className={`hb-toc__item h${item.level}${isActive ? ' is-active' : ''}`}
+            >
+              {item.text}
+            </a>
+          )
+        })}
       </div>
-      {items.map((item) => {
-        const isActive = activeId === item.id
-        return (
-          <a
-            key={item.id}
-            href={`#${item.id}`}
-            style={{
-              display: 'block',
-              paddingLeft: item.level === 3 ? 12 : 0,
-              padding: `3px 0 3px ${item.level === 3 ? 12 : 0}px`,
-              fontSize: 12,
-              lineHeight: 1.5,
-              color: isActive ? '#1d4ed8' : '#6b7280',
-              fontWeight: isActive ? 600 : 400,
-              textDecoration: 'none',
-              borderLeft: `2px solid ${isActive ? '#1d4ed8' : 'transparent'}`,
-              transition: 'color 0.1s, border-color 0.1s',
-            }}
-          >
-            {item.text}
-          </a>
-        )
-      })}
+
+      {readingMinutes > 0 && (
+        <>
+          <hr className="hb-toc__divider" />
+          <p className="hb-toc__meta">
+            Lesetid: ~{readingMinutes} {readingMinutes === 1 ? 'minutt' : 'minutter'}
+          </p>
+        </>
+      )}
     </nav>
   )
 }

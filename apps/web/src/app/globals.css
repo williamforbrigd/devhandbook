@@ -42,63 +42,9 @@ html.dark       { color-scheme: dark;  }
 
 /* ───────────────────────────────────────────────────────────────────────────
    Dark-mode bridge
-   ThemeProvider toggles `.dark` on <html>. handbook.css expects
-   `.hb.hb--dark` on the same element. Body has class="hb", so when
-   html is dark we activate hb--dark via attribute selectors.
+   ThemeProvider toggles `.dark` on <html>. handbook.css uses `html.dark .hb`
+   to apply dark tokens — no extra class on body needed.
    ─────────────────────────────────────────────────────────────────────────── */
-
-html.dark body.hb {
-  /* Re-declare the hb--dark tokens here so we don't have to add a class
-     to body in JS. Source of truth lives in handbook.css under .hb.hb--dark. */
-  --hb-bg:            #0c0d2c;
-  --hb-bg-app:        #08092a;
-  --hb-bg-soft:       #131547;
-  --hb-bg-tinted:     #181a52;
-  --hb-bg-superlight: #1a1c5e;
-
-  --hb-fg:        #e8e9ff;
-  --hb-fg-2:      #b9bbff;
-  --hb-fg-3:      #8d8fcb;
-  --hb-fg-muted:  #5d5f95;
-  --hb-fg-title:  #ffffff;
-  --hb-fg-link:   #9a9cff;
-
-  --hb-border:        #1f2150;
-  --hb-border-strong: #2c2e6b;
-  --hb-border-soft:   #161842;
-
-  --hb-accent:        #7b7eff;
-  --hb-accent-hover:  #9a9cff;
-  --hb-accent-soft:   #2d2f87;
-
-  --hb-code-bg:       #16181d;
-  --hb-code-bg-2:     #1f2128;
-  --hb-code-fg:       #d8dade;
-  --hb-code-comment:  #6c6f78;
-  --hb-code-string:   #a3c98a;
-  --hb-code-keyword:  #b89dff;
-  --hb-code-number:   #ffc079;
-  --hb-inline-code-bg:#1a1c5e;
-  --hb-inline-code-fg:#c9caff;
-
-  --hb-callout-info-bg:    #16194c;
-  --hb-callout-info-fg:    #c9caff;
-  --hb-callout-info-bd:    #2d2f87;
-  --hb-callout-warn-bg:    #3a2710;
-  --hb-callout-warn-fg:    #ffd297;
-  --hb-callout-warn-bd:    #6b4615;
-  --hb-callout-tip-bg:     #0e2e23;
-  --hb-callout-tip-fg:     #8ad6b3;
-  --hb-callout-tip-bd:     #2a5a47;
-  --hb-callout-dep-bg:     #181938;
-  --hb-callout-dep-fg:     #8d8fcb;
-  --hb-callout-dep-bd:     #2c2e6b;
-
-  --hb-mat-est-bg: #143a2c; --hb-mat-est-fg: #8ad6b3;
-  --hb-mat-rec-bg: #1c2078; --hb-mat-rec-fg: #c9caff;
-  --hb-mat-exp-bg: #3a2c10; --hb-mat-exp-fg: #ffd297;
-  --hb-mat-dep-bg: #3a1414; --hb-mat-dep-fg: #ff9b9b;
-}
 
 /* ───────────────────────────────────────────────────────────────────────────
    Legacy variable bridge
@@ -213,7 +159,8 @@ body.hb {
 .prose h3 { font-size: 1.25rem;  margin: 1.75rem 0 0.5rem;  font-weight: 700; }
 .prose h4 { font-size: 1.0625rem;margin: 1.5rem  0 0.4rem;  font-weight: 700; }
 .prose h2, .prose h3, .prose h4 { color: var(--hb-fg-title); scroll-margin-top: calc(var(--header-height) + 16px); }
-.prose a { color: var(--color-link); text-decoration: underline; text-underline-offset: 3px; }
+.prose a { color: var(--color-link); text-decoration: none; text-underline-offset: 3px; }
+.prose a:hover { text-decoration: underline; }
 .prose strong { font-weight: 700; }
 .prose ul, .prose ol { margin: 0 0 1em; padding-left: 1.5em; }
 .prose ul > li { list-style-type: disc; }

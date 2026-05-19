@@ -19,24 +19,16 @@ function HotspotDot({
   hotspot,
   index,
   isActive,
-  showPopover,
   onToggle,
   buttonRef,
 }: {
   hotspot: Hotspot
   index: number
   isActive: boolean
-  showPopover: boolean
   onToggle: () => void
   buttonRef?: React.Ref<HTMLButtonElement>
 }) {
-  // State suffix maps onto `.hb-hot--{state}` from the design system.
-  // - default: inactive dot with the pulsing accent ring
-  // - active:  the currently selected dot
   const stateClass = isActive ? 'hb-hot--active' : 'hb-hot--default'
-  // Flip the popover above the dot when the hotspot sits in the lower half of
-  // the image, so it stays inside the figure bounds.
-  const flipClass = hotspot.y > 60 ? ' hb-hot--flip' : ''
 
   return (
     <button
@@ -46,28 +38,11 @@ function HotspotDot({
       aria-expanded={isActive}
       aria-haspopup="dialog"
       onClick={onToggle}
-      className={`hb-hot ${stateClass}${flipClass}`}
+      className={`hb-hot ${stateClass}`}
       style={{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }}
     >
       <span className="hb-hot__pulse" aria-hidden="true" />
       <span className="hb-hot__dot">{index + 1}</span>
-
-      {/* Desktop popover — only rendered when this dot is the active one and
-          we're on desktop. The design CSS positions this below the dot. */}
-      {showPopover && isActive && (
-        <span
-          className="hb-hot__pop"
-          role="dialog"
-          aria-label={hotspot.label ?? `Hotspot ${index + 1}`}
-        >
-          {hotspot.label && (
-            <span className="hb-hot__poptitle">{hotspot.label}</span>
-          )}
-          {hotspot.content && (
-            <span className="hb-hot__popbody">{hotspot.content}</span>
-          )}
-        </span>
-      )}
     </button>
   )
 }
@@ -256,14 +231,36 @@ export function HotspotFigure({ value }: { value: any }): React.JSX.Element | nu
             hotspot={hs}
             index={i}
             isActive={activeIndex === i}
-            showPopover={!isMobile}
             onToggle={() => toggle(i)}
             buttonRef={activeIndex === i ? activeButtonRef : undefined}
           />
         ))}
 
-        {/* Mobile bottom sheet — rendered outside the dot button so it can be
-            a fullscreen overlay. */}
+        {/* Desktop popover — rendered at canvas level (not inside the button)
+            so it stays within the figure bounds. top/bottom set via inline
+            style; flip above the dot when y > 60% to avoid overflowing. */}
+        {!isMobile && activeHotspot && activeIndex !== null && (
+          <span
+            className={`hb-hot__pop${activeHotspot.y > 60 ? ' hb-hot__pop--flip' : ''}`}
+            role="dialog"
+            aria-label={activeHotspot.label ?? `Hotspot ${activeIndex + 1}`}
+            style={{
+              left: `clamp(120px, ${activeHotspot.x}%, calc(100% - 120px))`,
+              ...(activeHotspot.y > 60
+                ? { bottom: `calc(${100 - activeHotspot.y}% + 27px)` }
+                : { top: `calc(${activeHotspot.y}% + 27px)` }),
+            }}
+          >
+            {activeHotspot.label && (
+              <span className="hb-hot__poptitle">{activeHotspot.label}</span>
+            )}
+            {activeHotspot.content && (
+              <span className="hb-hot__popbody">{activeHotspot.content}</span>
+            )}
+          </span>
+        )}
+
+        {/* Mobile bottom sheet */}
         {isMobile && activeHotspot && activeIndex !== null && (
           <BottomSheet
             hotspot={activeHotspot}

@@ -8,6 +8,16 @@ interface InternalLinkValue {
     slug: string
     section: { slug: string } | null
   } | null
+  guide?: {
+    _id: string
+    title: string
+    slug: string
+  } | null
+  section?: {
+    _id: string
+    title: string
+    slug: string
+  } | null
 }
 
 export function InternalLink({
@@ -18,21 +28,20 @@ export function InternalLink({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   children?: any
 }): React.JSX.Element {
-  const article = value?.article
-  const section = article?.section?.slug
-  const slug = article?.slug
+  const broken = <span style={{ color: 'var(--color-text-muted)', textDecoration: 'line-through' }}>{children}</span>
 
-  // If the reference couldn't be resolved, render plain text
-  if (!article || !section || !slug) {
-    return <span style={{ color: 'var(--color-text-muted)', textDecoration: 'line-through' }}>{children}</span>
+  if (value?.guide?.slug) {
+    return <Link href={`/guides/${value.guide.slug}`}>{children}</Link>
   }
 
-  return (
-    <Link
-      href={`/${section}/${slug}`}
-      style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
-    >
-      {children}
-    </Link>
-  )
+  if (value?.section?.slug) {
+    return <Link href={`/${value.section.slug}`}>{children}</Link>
+  }
+
+  const article = value?.article
+  const sectionSlug = article?.section?.slug
+  const articleSlug = article?.slug
+  if (!article || !sectionSlug || !articleSlug) return broken
+
+  return <Link href={`/${sectionSlug}/${articleSlug}`}>{children}</Link>
 }

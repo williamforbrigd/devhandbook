@@ -3,9 +3,11 @@ import type { Metadata } from 'next'
 import { fetchArticle, fetchAllArticleParams, fetchRelatedFallback } from '../../../lib/queries'
 import type { RelatedArticle } from '../../../lib/queries'
 import { articleToMarkdown } from '../../../lib/portableTextToMarkdown'
+import { preprocessBody } from '../../../lib/preprocessBody'
 import { ArticleBody } from '../../../components/article/ArticleBody'
-import { extractTocItems } from '../../../lib/toc'
+import { extractTocItems, estimateReadingMinutes } from '../../../lib/toc'
 import { MaturityBadge } from '../../../components/article/MaturityBadge'
+import { ArticleBanner } from '../../../components/article/ArticleBanner'
 import { CopyMarkdownButtons } from '../../../components/article/CopyMarkdownButtons'
 import { RelatedSkillsSection } from '../../../components/article/RelatedSkillsSection'
 import { ArticleCard } from '../../../components/article/ArticleCard'
@@ -58,8 +60,13 @@ export default async function ArticlePage({
   if (!article) notFound()
 
   const tocItems = extractTocItems(article.body)
+  const readingMinutes = estimateReadingMinutes(article.body ?? [])
   const expertises = article.expertises ?? []
   const contributors = article.contributors ?? []
+
+  const [body] = await Promise.all([
+    preprocessBody(article.body ?? []),
+  ])
 
   const markdown = articleToMarkdown(
     {
@@ -73,7 +80,7 @@ export default async function ArticlePage({
     article.body ?? [],
   )
 
-  // ── Related articles: curated first, then fallback to fill up to 3 ─────────
+  // ── Related articles: curated first, then fallback to fill up to 3 ─────
   const curated = article.relatedArticles ?? []
   let related: RelatedArticle[] = curated
   if (curated.length < 3) {
@@ -91,7 +98,7 @@ export default async function ArticlePage({
 
   return (
     <article>
-      <TocRegistrar items={tocItems} />
+      <TocRegistrar items={tocItems} readingMinutes={readingMinutes} />
 
       {tocItems.length > 0 && (
         <div className="show-below-lg">
@@ -128,27 +135,25 @@ export default async function ArticlePage({
 
       {article.summary && <p className="hb-article__lede">{article.summary}</p>}
 
-      {/* Deprecated notice */}
+      {/* Maturity banners */}
+      {article.maturity === 'exploratory' && (
+        <ArticleBanner kind="exploratory" />
+      )}
       {article.maturity === 'deprecated' && (
-        <div className="hb-callout hb-callout--deprecated" role="note" style={{ marginBottom: 24 }}>
-          <strong>This article is deprecated.</strong>
-          {article.supersededBy && (
-            <>
-              {' '}See{' '}
-              <a
-                href={`/${article.supersededBy.section.slug}/${article.supersededBy.slug}`}
-                style={{ fontWeight: 600 }}
-              >
-                {article.supersededBy.title}
-              </a>{' '}
-              instead.
-            </>
-          )}
-        </div>
+        <ArticleBanner
+          kind="deprecated"
+          supersededBy={
+            article.supersededBy
+              ? { title: article.supersededBy.title, href: `/${article.supersededBy.section.slug}/${article.supersededBy.slug}` }
+              : null
+          }
+        />
       )}
 
-      {/* Body */}
-      <ArticleBody body={article.body ?? []} />
+      {/* Body — dimmed for deprecated articles */}
+      <div style={article.maturity === 'deprecated' ? { opacity: 0.55 } : undefined}>
+        <ArticleBody body={body} />
+      </div>
 
       {/* Related articles */}
       {related.length > 0 && (

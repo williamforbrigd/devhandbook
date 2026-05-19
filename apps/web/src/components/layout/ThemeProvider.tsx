@@ -34,6 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }): Reac
       const isDark =
         t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
       document.documentElement.classList.toggle('dark', isDark)
+      document.body.classList.toggle('hb--dark', isDark)
       setResolvedTheme(isDark ? 'dark' : 'light')
     }
 

@@ -13,6 +13,7 @@ import { SkillEmbed } from '../portable-text/SkillEmbed'
 import { SkillRef } from '../portable-text/SkillRef'
 import { DiagramBlock } from '../portable-text/DiagramBlock'
 import { HotspotFigure } from '../portable-text/HotspotFigure'
+import { Icon } from '../ui/Icon'
 import { ConceptModel } from '../portable-text/ConceptModel'
 import { Checklist } from '../portable-text/Checklist'
 import { StepList } from '../portable-text/StepList'
@@ -165,9 +166,8 @@ const components: PortableTextComponents = {
         href={value?.url ?? '#'}
         target={value?.newTab !== false ? '_blank' : undefined}
         rel="noopener noreferrer"
-        style={{ color: 'var(--color-link)', textDecoration: 'underline' }}
       >
-        {children}
+        {children}<Icon name="external" size={12} style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 3, marginBottom: 2 }} />
       </a>
     ),
     internalLink: ({ value, children }) => (
