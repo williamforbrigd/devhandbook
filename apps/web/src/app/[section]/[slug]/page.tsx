@@ -3,11 +3,15 @@ import type { Metadata } from 'next'
 import { fetchArticle, fetchAllArticleParams, fetchRelatedFallback } from '../../../lib/queries'
 import type { RelatedArticle } from '../../../lib/queries'
 import { articleToMarkdown } from '../../../lib/portableTextToMarkdown'
-import { ArticleBody, extractTocItems } from '../../../components/article/ArticleBody'
+import { ArticleBody } from '../../../components/article/ArticleBody'
+import { extractTocItems } from '../../../lib/toc'
 import { MaturityBadge } from '../../../components/article/MaturityBadge'
 import { CopyMarkdownButtons } from '../../../components/article/CopyMarkdownButtons'
 import { RelatedSkillsSection } from '../../../components/article/RelatedSkillsSection'
+import { ArticleCard } from '../../../components/article/ArticleCard'
 import { TocRegistrar, TableOfContentsMobile } from '../../../components/layout/TocContext'
+import { Pill } from '../../../components/ui/Pill'
+import { Avatar, Avatars } from '../../../components/ui/Avatar'
 
 // ── Static params ─────────────────────────────────────────────────────────────
 
@@ -28,6 +32,20 @@ export async function generateMetadata({
   return { title: article.title, description: article.summary ?? undefined }
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const dateFormatter = new Intl.DateTimeFormat('nb-NO', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+})
+
+function formatDate(iso: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? '' : dateFormatter.format(d)
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function ArticlePage({
@@ -40,6 +58,8 @@ export default async function ArticlePage({
   if (!article) notFound()
 
   const tocItems = extractTocItems(article.body)
+  const expertises = article.expertises ?? []
+  const contributors = article.contributors ?? []
 
   const markdown = articleToMarkdown(
     {
@@ -48,149 +68,76 @@ export default async function ArticlePage({
       section,
       maturity: article.maturity,
       lastVerifiedAt: article.lastVerifiedAt ?? null,
-      expertises: (article.expertises ?? []).map((e) => e.title),
+      expertises: expertises.map((e) => e.title),
     },
     article.body ?? [],
   )
 
-  // ── Related articles: curated first, then fallback to fill up to 4 ──────────
+  // ── Related articles: curated first, then fallback to fill up to 3 ─────────
   const curated = article.relatedArticles ?? []
   let related: RelatedArticle[] = curated
-  if (curated.length < 4) {
-    const expertiseIds = (article.expertises ?? []).map((e) => e._id)
+  if (curated.length < 3) {
+    const expertiseIds = expertises.map((e) => e._id)
     const fallback = await fetchRelatedFallback({
       currentId: article._id,
       section,
       expertiseIds,
-      limit: 4,
+      limit: 3,
     })
     const curatedIds = new Set(curated.map((r) => r._id))
     const extras = fallback.filter((r) => !curatedIds.has(r._id))
-    related = [...curated, ...extras].slice(0, 4)
+    related = [...curated, ...extras].slice(0, 3)
   }
 
   return (
     <article>
-      {/* Register ToC items client-side for scroll-spy */}
       <TocRegistrar items={tocItems} />
 
-      {/* Mobile ToC dropdown (shown below lg) */}
       {tocItems.length > 0 && (
         <div className="show-below-lg">
           <TableOfContentsMobile items={tocItems} />
         </div>
       )}
 
-      {/* Title + copy buttons */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
-        <h1 style={{
-          flex: 1,
-          fontSize: 'clamp(1.5rem, 3vw, 2rem)',
-          fontWeight: 800,
-          lineHeight: 1.2,
-          color: 'var(--color-text)',
-          margin: 0,
-        }}>
-          {article.title}
-        </h1>
-        <div style={{ flexShrink: 0, paddingTop: 6 }}>
+      {/* Metadata row */}
+      <div className="hb-meta">
+        <MaturityBadge maturity={article.maturity} />
+        {expertises.map((e) => (
+          <Pill key={e._id}>{e.title}</Pill>
+        ))}
+        {article.lastVerifiedAt && (
+          <span className="hb-meta__txt">· Last verified {formatDate(article.lastVerifiedAt)}</span>
+        )}
+        <span style={{ flex: 1 }} />
+        {contributors.length > 0 && (
+          <Avatars title={`Skrevet av ${contributors.map((c) => c.name).join(', ')}`}>
+            {contributors.map((c) => (
+              <Avatar key={c._id} name={c.name} avatarUrl={c.avatarUrl} />
+            ))}
+          </Avatars>
+        )}
+      </div>
+
+      {/* Title + actions */}
+      <div className="hb-article__head">
+        <h1>{article.title}</h1>
+        <div className="hb-article__actions">
           <CopyMarkdownButtons markdown={markdown} path={`/${section}/${slug}`} />
         </div>
       </div>
 
-      {/* Metadata row */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: 8,
-        paddingBottom: 16,
-        marginBottom: 24,
-        borderBottom: '1px solid var(--color-border)',
-        fontSize: 13,
-      }}>
-        <MaturityBadge maturity={article.maturity} />
-
-        {(article.expertises ?? []).map((e) => (
-          <span
-            key={e._id}
-            style={{
-              padding: '2px 8px',
-              borderRadius: 99,
-              fontSize: 11,
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text-muted)',
-            }}
-          >
-            {e.title}
-          </span>
-        ))}
-
-        {article.lastVerifiedAt && (
-          <span style={{ color: 'var(--color-text-muted)', marginLeft: 4 }}>
-            Verified{' '}
-            {new Date(article.lastVerifiedAt).toLocaleDateString('no-NO', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })}
-          </span>
-        )}
-
-        {/* Contributors */}
-        {(article.contributors ?? []).length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
-            {(article.contributors ?? []).map((c) => (
-              <span
-                key={c._id}
-                title={c.name}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 28,
-                  height: 28,
-                  borderRadius: '50%',
-                  overflow: 'hidden',
-                  border: '2px solid var(--color-bg)',
-                  boxShadow: '0 0 0 1px var(--color-border)',
-                  background: 'var(--color-surface)',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  color: 'var(--color-text-muted)',
-                  flexShrink: 0,
-                }}
-              >
-                {c.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={c.avatarUrl} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  c.name.charAt(0).toUpperCase()
-                )}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+      {article.summary && <p className="hb-article__lede">{article.summary}</p>}
 
       {/* Deprecated notice */}
       {article.maturity === 'deprecated' && (
-        <div style={{
-          marginBottom: 24,
-          padding: '12px 16px',
-          background: '#fef2f2',
-          border: '1px solid #fca5a5',
-          borderRadius: 8,
-          fontSize: 14,
-          color: '#991b1b',
-        }}>
+        <div className="hb-callout hb-callout--deprecated" role="note" style={{ marginBottom: 24 }}>
           <strong>This article is deprecated.</strong>
           {article.supersededBy && (
             <>
               {' '}See{' '}
               <a
                 href={`/${article.supersededBy.section.slug}/${article.supersededBy.slug}`}
-                style={{ color: '#991b1b', fontWeight: 600 }}
+                style={{ fontWeight: 600 }}
               >
                 {article.supersededBy.title}
               </a>{' '}
@@ -205,40 +152,17 @@ export default async function ArticlePage({
 
       {/* Related articles */}
       {related.length > 0 && (
-        <aside style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid var(--color-border)' }}>
-          <h2 style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-muted)', marginBottom: 12 }}>
-            Related
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <section style={{ marginTop: 64, paddingTop: 32, borderTop: '1px solid var(--hb-border)' }}>
+          <h2 style={{ fontSize: 20, marginBottom: 16 }}>Related articles</h2>
+          <div className="hb-related-grid">
             {related.map((r) => (
-              <a
-                key={r._id}
-                href={`/${r.section.slug}/${r.slug}`}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: 12,
-                  fontSize: 14,
-                  color: 'var(--color-text)',
-                  textDecoration: 'none',
-                  padding: '9px 12px',
-                  borderRadius: 6,
-                  border: '1px solid var(--color-border)',
-                  background: 'var(--color-surface)',
-                  transition: 'border-color 0.1s',
-                }}
-              >
-                <span style={{ fontWeight: 500 }}>{r.title}</span>
-                <MaturityBadge maturity={r.maturity} />
-              </a>
+              <ArticleCard key={r._id} article={r} />
             ))}
           </div>
-        </aside>
+        </section>
       )}
 
-      {/* Related AI Skills */}
-      <RelatedSkillsSection skills={article.relatedSkills ?? []}/>
+      <RelatedSkillsSection skills={article.relatedSkills ?? []} />
     </article>
   )
 }

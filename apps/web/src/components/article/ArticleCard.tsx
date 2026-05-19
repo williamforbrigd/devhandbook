@@ -1,63 +1,61 @@
+import React from 'react'
 import Link from 'next/link'
+import type { Maturity } from '../../lib/queries'
 import { MaturityBadge } from './MaturityBadge'
-import type { ArticleListItem } from '../../lib/queries'
 
-export function ArticleCard({ article, section }: { article: ArticleListItem; section: string }): React.JSX.Element {
-  const href = `/${section}/${article.slug}`
-  const SIX_MONTHS = 1000 * 60 * 60 * 24 * 180
-  const isStale =
-    !article.lastVerifiedAt ||
-    Date.now() - new Date(article.lastVerifiedAt).getTime() > SIX_MONTHS
+const dateFormatter = new Intl.DateTimeFormat('nb-NO', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+})
 
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? '' : dateFormatter.format(d)
+}
+
+export type ArticleCardData = {
+  _id: string
+  title: string
+  slug: string
+  summary?: string | null
+  maturity?: Maturity
+  section: { title?: string | null; slug: string } | null
+  expertises?: { title: string; slug: string }[] | null
+  date?: string | null
+}
+
+/**
+ * `.hb-card` link tile used by the home page ("Recently updated") and article
+ * page ("Related articles"). Shows section eyebrow, title, summary (2-line
+ * clamp), expertise chips, maturity badge, and last-updated date.
+ */
+export function ArticleCard({ article }: { article: ArticleCardData }): React.JSX.Element {
+  const sectionSlug = article.section?.slug
+  const sectionTitle = article.section?.title ?? ''
+  const expertises = article.expertises ?? []
+  const href = sectionSlug ? `/${sectionSlug}/${article.slug}` : `/${article.slug}`
   return (
     <Link
       href={href}
-      style={{
-        display: 'block',
-        padding: '16px 20px',
-        border: '1px solid var(--color-border)',
-        borderRadius: 8,
-        textDecoration: 'none',
-        background: 'var(--color-bg)',
-        transition: 'border-color 0.15s, box-shadow 0.15s',
-      }}
+      className="hb-card"
+      style={{ textDecoration: 'none', color: 'inherit' }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: article.summary ? 6 : 0 }}>
-        <span style={{ flex: 1, fontSize: 15, fontWeight: 600, color: 'var(--color-text)', lineHeight: 1.4 }}>
-          {article.title}
-        </span>
-        <MaturityBadge maturity={article.maturity} />
-        {isStale && article.maturity !== 'deprecated' && (
-          <span title="Not verified in 6+ months" style={{ fontSize: 11, color: '#d97706', whiteSpace: 'nowrap' }}>
-            ⚠ Stale
-          </span>
-        )}
+      <div className="hb-card__top">
+        {sectionTitle && <span className="hb-card__section">{sectionTitle}</span>}
+        {article.maturity && <MaturityBadge maturity={article.maturity} />}
       </div>
-
-      {article.summary && (
-        <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5 }}>
-          {article.summary}
-        </p>
-      )}
-
-      {(article.expertises ?? []).length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
-          {(article.expertises ?? []).map((e) => (
-            <span
-              key={e.slug}
-              style={{
-                padding: '1px 7px',
-                borderRadius: 99,
-                fontSize: 11,
-                border: '1px solid var(--color-border)',
-                color: 'var(--color-text-muted)',
-              }}
-            >
-              {e.title}
-            </span>
+      <h3 className="hb-card__title">{article.title}</h3>
+      {article.summary && <p className="hb-card__summary">{article.summary}</p>}
+      <div className="hb-card__foot">
+        <div className="hb-card__chips">
+          {expertises.slice(0, 2).map((e) => (
+            <span key={e.slug} className="hb-card__chip">{e.title}</span>
           ))}
         </div>
-      )}
+        {article.date && <span>{formatDate(article.date)}</span>}
+      </div>
     </Link>
   )
 }

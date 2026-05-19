@@ -39,3 +39,20 @@ pnpm-debug.log*
 
 # Test / coverage
 coverage/
+
+# IDE
+.idea/
+*.iml
+.vscode/launch.json
+
+# Editor swap files
+*.swp
+*.swo
+*~
+
+# Local caches
+.cache/
+.eslintcache
+
+# OS
+desktop.ini

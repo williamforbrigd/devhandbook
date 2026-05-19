@@ -1,89 +1,164 @@
 @import "tailwindcss";
 
+/* ───────────────────────────────────────────────────────────────────────────
+   Lasso design system (POC: copied from claude design handoff)
+   - tokens.css   — Lasso brand primitives (colors, font-faces, type scale)
+   - handbook.css — Handbook view styles, all scoped under .hb
+   When this POC is later merged into the Lasso monorepo these two imports
+   should be replaced by the equivalent shared package.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@import "../styles/design-system/tokens.css";
+@import "../styles/design-system/handbook.css";
+
+/* ───────────────────────────────────────────────────────────────────────────
+   App layout primitives (not part of the design system)
+   ─────────────────────────────────────────────────────────────────────────── */
+
 :root {
-  --color-bg: #ffffff;
-  --color-bg-subtle: #f9fafb;
-  --color-surface: #f3f4f6;
-  --color-border: #e5e7eb;
-  --color-text: #111827;
-  --color-text-muted: #6b7280;
-  --color-link: #1d4ed8;
-  --color-indigo: #6366f1;
-
-  --font-sans: var(--font-sans, system-ui, -apple-system, sans-serif);
-  --font-mono: var(--font-mono, ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace);
-
   --sidebar-width: 280px;
   --toc-width: 220px;
   --header-height: 56px;
-
-  /* Prose typographic scale */
-  --prose-line-height: 1.75;
-  --prose-font-size: 0.9375rem; /* 15px */
-  --prose-max-width: 72ch;
-}
-
-.dark {
-  --color-bg: #0f1117;
-  --color-bg-subtle: #161b27;
-  --color-surface: #1e2535;
-  --color-border: #2d3748;
-  --color-text: #f1f5f9;
-  --color-text-muted: #94a3b8;
-  --color-link: #60a5fa;
-  --color-indigo: #818cf8;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
-html:not(.dark) { color-scheme: light; }
-html.dark { color-scheme: dark; }
+/* The shell uses min-height: 100% — propagate viewport height down so it fills the screen. */
+html, body { height: 100%; }
+body { margin: 0; }
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
+/* Collapse the right TOC column when no page has registered any TOC items.
+   The aside in layout always renders (it's the portal target), but when it's
+   empty we drop the 220px column and hide the aside so the main pane fills. */
+.hb-pane.hb-pane--with-toc:has(> .hb-toc:empty) {
+  grid-template-columns: 1fr;
+}
+.hb-pane.hb-pane--with-toc > .hb-toc:empty {
+  display: none;
 }
 
-/* Hide sidebar/toc on small screens */
+html:not(.dark) { color-scheme: light; }
+html.dark       { color-scheme: dark;  }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Dark-mode bridge
+   ThemeProvider toggles `.dark` on <html>. handbook.css expects
+   `.hb.hb--dark` on the same element. Body has class="hb", so when
+   html is dark we activate hb--dark via attribute selectors.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+html.dark body.hb {
+  /* Re-declare the hb--dark tokens here so we don't have to add a class
+     to body in JS. Source of truth lives in handbook.css under .hb.hb--dark. */
+  --hb-bg:            #0c0d2c;
+  --hb-bg-app:        #08092a;
+  --hb-bg-soft:       #131547;
+  --hb-bg-tinted:     #181a52;
+  --hb-bg-superlight: #1a1c5e;
+
+  --hb-fg:        #e8e9ff;
+  --hb-fg-2:      #b9bbff;
+  --hb-fg-3:      #8d8fcb;
+  --hb-fg-muted:  #5d5f95;
+  --hb-fg-title:  #ffffff;
+  --hb-fg-link:   #9a9cff;
+
+  --hb-border:        #1f2150;
+  --hb-border-strong: #2c2e6b;
+  --hb-border-soft:   #161842;
+
+  --hb-accent:        #7b7eff;
+  --hb-accent-hover:  #9a9cff;
+  --hb-accent-soft:   #2d2f87;
+
+  --hb-code-bg:       #16181d;
+  --hb-code-bg-2:     #1f2128;
+  --hb-code-fg:       #d8dade;
+  --hb-code-comment:  #6c6f78;
+  --hb-code-string:   #a3c98a;
+  --hb-code-keyword:  #b89dff;
+  --hb-code-number:   #ffc079;
+  --hb-inline-code-bg:#1a1c5e;
+  --hb-inline-code-fg:#c9caff;
+
+  --hb-callout-info-bg:    #16194c;
+  --hb-callout-info-fg:    #c9caff;
+  --hb-callout-info-bd:    #2d2f87;
+  --hb-callout-warn-bg:    #3a2710;
+  --hb-callout-warn-fg:    #ffd297;
+  --hb-callout-warn-bd:    #6b4615;
+  --hb-callout-tip-bg:     #0e2e23;
+  --hb-callout-tip-fg:     #8ad6b3;
+  --hb-callout-tip-bd:     #2a5a47;
+  --hb-callout-dep-bg:     #181938;
+  --hb-callout-dep-fg:     #8d8fcb;
+  --hb-callout-dep-bd:     #2c2e6b;
+
+  --hb-mat-est-bg: #143a2c; --hb-mat-est-fg: #8ad6b3;
+  --hb-mat-rec-bg: #1c2078; --hb-mat-rec-fg: #c9caff;
+  --hb-mat-exp-bg: #3a2c10; --hb-mat-exp-fg: #ffd297;
+  --hb-mat-dep-bg: #3a1414; --hb-mat-dep-fg: #ff9b9b;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Legacy variable bridge
+   Existing components use --color-*, --color-link, --color-indigo, etc.
+   Rather than refactor everything in one pass, alias them onto the new
+   handbook tokens so they automatically pick up the design system.
+   These aliases can be deleted as components migrate to .hb-* classes.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+body.hb {
+  --color-bg:         var(--hb-bg);
+  --color-bg-subtle:  var(--hb-bg-soft);
+  --color-surface:    var(--hb-bg-tinted);
+  --color-border:     var(--hb-border);
+  --color-text:       var(--hb-fg);
+  --color-text-muted: var(--hb-fg-muted);
+  --color-link:       var(--hb-fg-link);
+  --color-indigo:     var(--hb-accent);
+  --font-sans:        var(--font-body);
+
+  /* Prose fallback variables for existing .prose wrappers */
+  --prose-line-height: 1.6;
+  --prose-font-size:   1rem;
+  --prose-max-width:   72ch;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Layout helpers (reused across pages)
+   ─────────────────────────────────────────────────────────────────────────── */
+
 @media (max-width: 1023px) {
   .hide-below-lg { display: none !important; }
 }
-
-/* Show only on small screens (mobile ToC dropdown) */
 @media (min-width: 1024px) {
   .show-below-lg { display: none !important; }
 }
 
-/* ── Shiki code blocks ─────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────────────
+   Shiki code blocks
+   ─────────────────────────────────────────────────────────────────────────── */
 
-/* Light/dark theme switching */
 .shiki-light { display: block; }
 .shiki-dark  { display: none;  }
 .dark .shiki-light { display: none;  }
 .dark .shiki-dark  { display: block; }
 
-/* Strip shiki's default background so our wrapper controls it */
 .shiki-light .shiki,
-.shiki-dark  .shiki {
-  background: transparent !important;
-}
+.shiki-dark  .shiki { background: transparent !important; }
 
-/* Inner <pre> resets */
 .shiki-wrapper pre {
   margin: 0;
   padding: 16px;
   overflow-x: auto;
   font-size: 13px;
   line-height: 1.65;
-  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  background: var(--color-bg-subtle);
+  font-family: var(--font-mono);
+  background: var(--hb-code-bg, var(--color-bg-subtle));
+  color: var(--hb-code-fg);
 }
 
-/* Highlighted lines */
 .shiki-wrapper .highlighted-line {
   background: color-mix(in srgb, var(--color-link) 10%, transparent);
   border-left: 2px solid var(--color-link);
@@ -94,7 +169,6 @@ body {
   display: block;
 }
 
-/* Line numbers via data-line attribute */
 .shiki-wrapper[data-show-line-numbers] .line::before {
   content: attr(data-line);
   display: inline-block;
@@ -106,7 +180,10 @@ body {
   user-select: none;
 }
 
-/* ── HotspotFigure ─────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────────────
+   HotspotFigure animations
+   ─────────────────────────────────────────────────────────────────────────── */
+
 @keyframes hf-pulse {
   0%   { box-shadow: 0 0 0 0   rgba(99, 102, 241, 0.55); }
   70%  { box-shadow: 0 0 0 9px rgba(99, 102, 241, 0);    }
@@ -118,8 +195,12 @@ body {
   to   { transform: translateY(0);    }
 }
 
-/* ── Prose ─────────────────────────────────────────────────────────────────── */
-/* Applied to the article / guide body content wrapper                          */
+/* ───────────────────────────────────────────────────────────────────────────
+   Prose fallback
+   handbook.css owns most typography. This is a thin compatibility layer for
+   the existing PortableText wrapper (<div className="prose">) until that
+   component is migrated to handbook's content classes.
+   ─────────────────────────────────────────────────────────────────────────── */
 
 .prose {
   font-size: var(--prose-font-size);
@@ -127,129 +208,35 @@ body {
   color: var(--color-text);
   max-width: var(--prose-max-width);
 }
-
-.prose p {
-  margin: 0 0 1.25em;
-}
-
-.prose h1,
-.prose h2,
-.prose h3,
-.prose h4,
-.prose h5 {
-  color: var(--color-text);
-  font-weight: 700;
-  line-height: 1.3;
-  scroll-margin-top: calc(var(--header-height) + 16px);
-}
-
-.prose h2 { font-size: 1.5rem;   margin: 2rem   0 0.75rem; }
-.prose h3 { font-size: 1.25rem;  margin: 1.75rem 0 0.5rem;  }
-.prose h4 { font-size: 1.0625rem;margin: 1.5rem  0 0.4rem;  }
-.prose h5 { font-size: 0.9375rem;margin: 1.25rem 0 0.4rem;  }
-
-/* Heading anchor hover indicator */
-.prose :is(h2, h3, h4, h5) a {
-  color: inherit;
-  text-decoration: none;
-}
-.prose :is(h2, h3, h4, h5):hover::after {
-  content: ' #';
-  font-weight: 400;
-  color: var(--color-text-muted);
-  font-size: 0.875em;
-}
-
-.prose a {
-  color: var(--color-link);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.prose a:hover {
-  text-decoration-thickness: 2px;
-}
-
+.prose p { margin: 0 0 1em; }
+.prose h2 { font-size: 1.5rem;   margin: 2rem   0 0.75rem; font-weight: 700; }
+.prose h3 { font-size: 1.25rem;  margin: 1.75rem 0 0.5rem;  font-weight: 700; }
+.prose h4 { font-size: 1.0625rem;margin: 1.5rem  0 0.4rem;  font-weight: 700; }
+.prose h2, .prose h3, .prose h4 { color: var(--hb-fg-title); scroll-margin-top: calc(var(--header-height) + 16px); }
+.prose a { color: var(--color-link); text-decoration: underline; text-underline-offset: 3px; }
 .prose strong { font-weight: 700; }
-.prose em { font-style: italic; }
-
+.prose ul, .prose ol { margin: 0 0 1em; padding-left: 1.5em; }
+.prose ul > li { list-style-type: disc; }
+.prose ol > li { list-style-type: decimal; }
 .prose code:not(pre code) {
-  font-family: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--font-mono);
   font-size: 0.875em;
   padding: 0.15em 0.4em;
   border-radius: 4px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
+  background: var(--hb-inline-code-bg);
+  color: var(--hb-inline-code-fg);
 }
-
-.prose pre {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.8125em;
-  line-height: 1.65;
-  overflow-x: auto;
-  margin: 1.25em 0;
-  padding: 1em 1.25em;
-  background: var(--color-bg-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-}
-
-.prose ul,
-.prose ol {
-  margin: 0 0 1.25em;
-  padding-left: 1.5em;
-}
-.prose li { margin-bottom: 0.375em; }
-.prose ul > li { list-style-type: disc; }
-.prose ol > li { list-style-type: decimal; }
-.prose li > ul,
-.prose li > ol { margin: 0.375em 0 0; }
-
 .prose blockquote {
   margin: 1.5em 0;
-  padding: 0.75em 1.25em;
-  border-left: 3px solid var(--color-indigo);
-  background: color-mix(in srgb, var(--color-indigo) 5%, var(--color-bg));
+  padding: 0.5em 1em;
+  border-left: 3px solid var(--hb-accent-soft);
   color: var(--color-text-muted);
-  border-radius: 0 6px 6px 0;
   font-style: italic;
 }
-.prose blockquote p:last-child { margin-bottom: 0; }
-
-.prose hr {
-  border: none;
-  border-top: 1px solid var(--color-border);
-  margin: 2em 0;
-}
-
-.prose table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875em;
-  margin: 1.25em 0;
-}
-.prose th,
-.prose td {
-  padding: 8px 12px;
-  text-align: left;
-  border: 1px solid var(--color-border);
-}
-.prose th {
-  background: var(--color-surface);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.prose img {
-  max-width: 100%;
-  border-radius: 8px;
-  border: 1px solid var(--color-border);
-}
-
+.prose hr { border: 0; border-top: 1px solid var(--color-border); margin: 2em 0; }
+.prose table { width: 100%; border-collapse: collapse; font-size: 0.875em; margin: 1.25em 0; }
+.prose th, .prose td { padding: 8px 12px; text-align: left; border: 1px solid var(--color-border); }
+.prose th { background: var(--hb-bg-tinted); font-weight: 600; }
+.prose img { max-width: 100%; border-radius: 8px; border: 1px solid var(--color-border); }
 .prose figure { margin: 1.5em 0; }
-.prose figcaption {
-  margin-top: 6px;
-  font-size: 0.8125em;
-  color: var(--color-text-muted);
-  text-align: center;
-}
+.prose figcaption { margin-top: 6px; font-size: 0.8125em; color: var(--color-text-muted); text-align: center; }

@@ -1,3 +1,5 @@
+'use client'
+
 import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
 import { CodeBlock } from '../portable-text/CodeBlock'
@@ -207,23 +209,3 @@ export function ArticleBody({ body }: { body: any[] }): React.JSX.Element {
   )
 }
 
-// ── ToC extraction from body ──────────────────────────────────────────────────
-
-import type { TocItem } from '../layout/TocContext'
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function extractTocItems(body: any[]): TocItem[] {
-  if (!Array.isArray(body)) return []
-  const items: TocItem[] = []
-  for (const block of body) {
-    if (block._type !== 'block') continue
-    if (block.style !== 'h2' && block.style !== 'h3') continue
-    const text = (block.children ?? [])
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((c: any) => c.text ?? '')
-      .join('')
-    if (!text) continue
-    items.push({ id: slugify(text), text, level: block.style === 'h2' ? 2 : 3 })
-  }
-  return items
-}
