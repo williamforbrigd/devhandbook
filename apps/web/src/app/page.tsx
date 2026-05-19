@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { fetchAllSectionsWithCounts, fetchRecentArticles } from '../lib/queries'
-import { SearchTrigger } from '../components/layout/SearchTrigger'
+import { HandbookSearchBar } from '../components/layout/search/HandbookSearchBar'
 import { Icon } from '../components/ui/Icon'
 import { ArticleCard } from '../components/article/ArticleCard'
 import { APP_VERSION_LABEL } from '../lib/version'
@@ -31,7 +31,7 @@ export default async function Home(): Promise<React.JSX.Element> {
           Skrevet av folkene som faktisk har kjørt det i prod.
         </p>
         <div style={{ marginTop: 16 }}>
-          <SearchTrigger variant="wide" />
+          <HandbookSearchBar variant="wide" />
         </div>
       </section>
 

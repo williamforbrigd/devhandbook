@@ -293,34 +293,6 @@ a.hb-crumb__step:hover { background: var(--hb-bg-tinted); }
   display: inline-flex; align-items: center;
 }
 .hb-crumb__sep svg { stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.hb-search {
-  position: relative;
-  width: 360px; max-width: 100%;
-}
-.hb-search input {
-  width: 100%; box-sizing: border-box;
-  font-family: inherit; font-size: 13px;
-  padding: 9px 16px 9px 38px;
-  border: 1px solid #16175c;
-  border-radius: 9999px;
-  background: var(--hb-bg);
-  color: var(--hb-fg);
-  outline: none;
-}
-.hb.hb--dark .hb-search input { border-color: var(--hb-border-strong); background: var(--hb-bg-soft); }
-.hb-search input:focus { border-color: var(--hb-accent); box-shadow: 0 0 0 3px var(--hb-accent-soft); }
-.hb-search input::placeholder { color: var(--hb-fg-3); }
-.hb-search svg {
-  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-  stroke: var(--hb-fg-3); fill: none; stroke-width: 2;
-}
-.hb-search kbd {
-  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-  font-family: var(--font-mono); font-size: 10px;
-  padding: 2px 6px; border-radius: 9999px;
-  background: var(--hb-bg-tinted); color: var(--hb-fg-3);
-  border: 1px solid var(--hb-border);
-}
 .hb-icon-btn {
   width: 32px; height: 32px; border-radius: 6px;
   border: 1px solid var(--hb-border-strong);
@@ -1226,39 +1198,6 @@ a.hb-crumb__step:hover { background: var(--hb-bg-tinted); }
 .hb-tmpl:hover .hb-tmpl__cta { color: var(--hb-accent); }
 .hb-tmpl__cta svg { stroke: currentColor; fill: none; stroke-width: 2; }
 
-/* ---------- Search dialog (⌘K modal) ---------- */
-.hb-search-modal { position: absolute; inset: 0; }
-.hb-search-modal__bg {
-  position: absolute; inset: 0;
-  background: rgba(9,9,50,0.42);
-  backdrop-filter: blur(2px);
-}
-.hb.hb--dark .hb-search-modal__bg { background: rgba(0,0,10,0.6); }
-.hb-search-modal__panel {
-  position: absolute; top: 16%; left: 50%; transform: translateX(-50%);
-  width: min(560px, 92%);
-  background: var(--hb-bg);
-  border: 1px solid var(--hb-border);
-  border-radius: 12px;
-  box-shadow: 0 24px 60px rgba(13,18,80,0.32);
-  overflow: hidden;
-}
-.hb-search-modal__inputrow {
-  display: grid; grid-template-columns: 18px 1fr auto;
-  align-items: center; gap: 12px;
-  padding: 16px 18px;
-  border-bottom: 1px solid var(--hb-border);
-}
-.hb-search-modal__inputrow svg { stroke: var(--hb-fg-3); fill: none; stroke-width: 2; }
-.hb-search-modal__inputrow input {
-  border: 0; background: transparent; outline: none;
-  font-family: inherit; font-size: 16px;
-  color: var(--hb-fg);
-  width: 100%;
-}
-.hb-search-modal__inputrow input::placeholder { color: var(--hb-fg-3); }
-.hb-search-modal__body { padding: 16px 18px 14px; }
-
 /* ---------- Living-document banner ---------- */
 .hb-livingdoc {
   display: flex; align-items: flex-start; gap: 10px;
@@ -1281,27 +1220,6 @@ a.hb-crumb__step:hover { background: var(--hb-bg-tinted); }
 }
 .hb-livingdoc__icon svg { stroke: currentColor; fill: none; stroke-width: 2; }
 
-.hb-search-modal__soon {
-  display: flex; align-items: center; gap: 14px;
-  background: var(--hb-bg-tinted);
-  border: 1px solid var(--hb-border);
-  border-radius: 8px;
-  padding: 14px 16px;
-}
-.hb-search-modal__icon {
-  width: 36px; height: 36px; border-radius: 9999px;
-  background: var(--hb-bg);
-  color: var(--hb-accent);
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.hb-search-modal__icon svg { stroke: currentColor; fill: none; stroke-width: 2; animation: hb-spin 1500ms linear infinite; }
-.hb-search-modal__title { font-size: 14px; font-weight: 700; color: var(--hb-fg-title); }
-.hb-search-modal__sub { font-size: 12.5px; color: var(--hb-fg-2); margin-top: 2px; }
-.hb-search-modal__hint {
-  display: flex; gap: 18px; padding-top: 12px; margin-top: 12px;
-  border-top: 1px solid var(--hb-border);
-  font-size: 12px; color: var(--hb-fg-3);
-}
 .hb-kbd {
   display: inline-flex; align-items: center; gap: 4px;
   font-family: var(--font-mono); font-size: 11px;
