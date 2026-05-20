@@ -36,7 +36,10 @@ function ExpertiseFilter({
   if (expertises.length === 0) return null
   return (
     <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--hb-border)' }}>
-      <div className="hb-side__sectionlabel" style={{ marginBottom: 8 }}>Filter by expertise</div>
+      <div className="hb-side__sectionlabel" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+        <Icon name="filter" size={11} style={{ opacity: 0.6 }} />
+        Filter by expertise
+      </div>
       <div className="hb-chips">
         {expertises.map((e) => {
           const active = selected.has(e.slug)

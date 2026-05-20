@@ -1,52 +1,20 @@
 import React from 'react'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
-import { Info, AlertTriangle, Lightbulb, AlertOctagon } from 'lucide-react'
+import { Icon } from '../ui/Icon'
 
 // ── Variant config ────────────────────────────────────────────────────────────
 
 type Variant = 'info' | 'warning' | 'tip' | 'deprecated'
 
-interface VariantStyle {
-  bg: string
-  border: string
-  text: string
-  Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>
-  label: string
+const VARIANT_CONFIG: Record<Variant, { icon: string; label: string }> = {
+  info:       { icon: 'info',          label: 'Note' },
+  warning:    { icon: 'alertTriangle', label: 'Warning' },
+  tip:        { icon: 'lightbulb',     label: 'Tips' },
+  deprecated: { icon: 'clock',         label: 'Deprecated' },
 }
 
-const VARIANT_CONFIG: Record<Variant, VariantStyle> = {
-  info: {
-    bg: '#eff6ff',
-    border: '#93c5fd',
-    text: '#1e40af',
-    Icon: Info,
-    label: 'Note',
-  },
-  warning: {
-    bg: '#fffbeb',
-    border: '#fcd34d',
-    text: '#92400e',
-    Icon: AlertTriangle,
-    label: 'Warning',
-  },
-  tip: {
-    bg: '#f0fdf4',
-    border: '#86efac',
-    text: '#166534',
-    Icon: Lightbulb,
-    label: 'Tip',
-  },
-  deprecated: {
-    bg: '#fdf4ff',
-    border: '#d8b4fe',
-    text: '#6b21a8',
-    Icon: AlertOctagon,
-    label: 'Deprecated',
-  },
-}
-
-const FALLBACK: VariantStyle = VARIANT_CONFIG.info
+const FALLBACK = VARIANT_CONFIG.info
 
 // ── Minimal nested PortableText components (avoids importing the full ArticleBody) ──
 
@@ -84,7 +52,6 @@ const nestedComponents: PortableTextComponents = {
 export function Callout({ value }: { value: any }): React.JSX.Element | null {
   const variant = (value?.variant ?? 'info') as Variant
   const config = VARIANT_CONFIG[variant] ?? FALLBACK
-  const { Icon, bg, border, text, label } = config
   const title: string | null = value?.title ?? null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const content: any[] = value?.content ?? []
@@ -92,41 +59,18 @@ export function Callout({ value }: { value: any }): React.JSX.Element | null {
   return (
     <div
       role="note"
-      aria-label={title ?? label}
-      style={{
-        margin: '1.25rem 0',
-        borderLeft: `4px solid ${border}`,
-        background: bg,
-        borderRadius: '0 6px 6px 0',
-        overflow: 'hidden',
-      }}
+      aria-label={title ?? config.label}
+      className={`hb-callout hb-callout--${variant}`}
+      style={{ margin: '1.25rem 0' }}
     >
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          padding: '8px 14px 6px',
-          color: text,
-          fontWeight: 600,
-          fontSize: 13,
-        }}
-      >
-        <Icon size={15} strokeWidth={2.2} aria-hidden />
-        {title ?? label}
+      <div className="hb-callout__icon" aria-hidden="true">
+        <Icon name={config.icon} size={16} />
       </div>
 
-      {/* Body — nested PortableText */}
+      <div className="hb-callout__title">{title ?? config.label}</div>
+
       {content.length > 0 && (
-        <div
-          style={{
-            padding: '0 14px 10px',
-            fontSize: 14,
-            lineHeight: 1.6,
-            color: text,
-          }}
-        >
+        <div className="hb-callout__body">
           <PortableText value={content} components={nestedComponents} />
         </div>
       )}

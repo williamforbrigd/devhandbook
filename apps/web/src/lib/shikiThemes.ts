@@ -118,16 +118,16 @@ export const handbookDark: ThemeRegistration = {
   name: 'handbook-dark',
   type: 'dark',
   colors: {
-    'editor.background': '#161b27',
-    'editor.foreground': '#f1f5f9',
+    'editor.background': '#1f2128',
+    'editor.foreground': '#e6e6e8',
   },
   tokenColors: [
     // Default
-    { settings: { foreground: '#f1f5f9' } },
+    { settings: { foreground: '#e6e6e8' } },
     // Comments
     {
       scope: ['comment', 'punctuation.definition.comment'],
-      settings: { foreground: '#94a3b8', fontStyle: 'italic' },
+      settings: { foreground: '#8a8d97', fontStyle: 'italic' },
     },
     // Keywords
     {
@@ -141,27 +141,27 @@ export const handbookDark: ThemeRegistration = {
         'variable.language.this',
         'variable.language.super',
       ],
-      settings: { foreground: '#60a5fa', fontStyle: 'bold' },
+      settings: { foreground: '#c9b3ff', fontStyle: 'bold' },
     },
     // Strings
     {
       scope: ['string', 'string.quoted', 'string.template'],
-      settings: { foreground: '#34d399' },
+      settings: { foreground: '#b5d7a8' },
     },
-    // String interpolation
+    // String interpolation / template expressions
     {
       scope: ['punctuation.definition.template-expression', 'string.template variable'],
-      settings: { foreground: '#2dd4bf' },
+      settings: { foreground: '#94dfd7' },
     },
-    // Numbers, booleans
+    // Numbers, booleans, null/undefined
     {
       scope: ['constant.numeric', 'constant.language.boolean', 'constant.language.null', 'constant.language.undefined'],
-      settings: { foreground: '#fbbf24' },
+      settings: { foreground: '#ffcf99' },
     },
     // Functions
     {
       scope: ['entity.name.function', 'meta.function-call entity.name.function', 'support.function'],
-      settings: { foreground: '#a78bfa' },
+      settings: { foreground: '#ffd297' },
     },
     // Types, classes
     {
@@ -172,42 +172,47 @@ export const handbookDark: ThemeRegistration = {
         'support.type',
         'support.class',
       ],
-      settings: { foreground: '#22d3ee' },
+      settings: { foreground: '#88d4f5' },
     },
     // Parameters
     {
       scope: ['variable.parameter'],
-      settings: { foreground: '#e2e8f0' },
+      settings: { foreground: '#e6e6e8' },
     },
     // Properties
     {
       scope: ['variable.object.property', 'support.type.property-name', 'entity.name.tag.css'],
-      settings: { foreground: '#2dd4bf' },
+      settings: { foreground: '#94dfd7' },
     },
     // Imports / namespaces
     {
       scope: ['entity.name.namespace', 'meta.import variable'],
-      settings: { foreground: '#60a5fa' },
+      settings: { foreground: '#b9bbff' },
     },
     // Operators, punctuation
     {
       scope: ['keyword.operator', 'punctuation.accessor'],
-      settings: { foreground: '#cbd5e1' },
+      settings: { foreground: '#8a8d97' },
     },
-    // CSS: selectors
+    // CSS: selectors / tag names
     {
       scope: ['entity.name.tag', 'entity.other.attribute-name'],
-      settings: { foreground: '#a78bfa' },
+      settings: { foreground: '#c9b3ff' },
+    },
+    // CSS: attribute values / HTML attributes
+    {
+      scope: ['entity.other.attribute-name.html'],
+      settings: { foreground: '#88d4f5' },
     },
     // Decorators
     {
       scope: ['meta.decorator punctuation.decorator', 'meta.decorator entity.name.function'],
-      settings: { foreground: '#fbbf24' },
+      settings: { foreground: '#ffcf99' },
     },
     // Regex
     {
       scope: ['string.regexp', 'constant.other.character-class.regexp'],
-      settings: { foreground: '#22d3ee' },
+      settings: { foreground: '#94dfd7' },
     },
   ],
 }

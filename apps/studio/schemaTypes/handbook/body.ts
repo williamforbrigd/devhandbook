@@ -54,6 +54,8 @@ export const body = defineField({
             title: 'Internal link',
             fields: [
               defineField({ name: 'article', type: 'reference', to: [{ type: 'hb.article' }] }),
+              defineField({ name: 'guide', type: 'reference', to: [{ type: 'hb.guide' }] }),
+              defineField({ name: 'section', type: 'reference', to: [{ type: 'hb.section' }] }),
             ],
           },
           {
@@ -282,14 +284,16 @@ export const body = defineField({
       type: 'object',
       title: 'Decision record',
       fields: [
+        defineField({ name: 'title', title: 'Title', type: 'string', description: 'Short heading for this decision record' }),
         defineField({ name: 'context', title: 'Context', type: 'text', rows: 3 }),
         defineField({ name: 'decision', title: 'Decision', type: 'text', rows: 3 }),
         defineField({ name: 'consequences', title: 'Consequences', type: 'text', rows: 3 }),
       ],
       preview: {
-        select: { title: 'decision' },
-        prepare({ title }: { title?: string }) {
-          return { title: title ? `ADR: ${title.slice(0, 60)}` : 'Decision record' }
+        select: { title: 'title', decision: 'decision' },
+        prepare({ title, decision }: { title?: string; decision?: string }) {
+          const label = title ?? (decision ? decision.slice(0, 60) : undefined)
+          return { title: label ? `ADR: ${label}` : 'Decision record' }
         },
       },
     }),

@@ -31,7 +31,33 @@ export function MermaidDiagram({
         const { default: mermaid } = await import('mermaid')
         mermaid.initialize({
           startOnLoad: false,
-          theme: 'neutral',
+          theme: 'base',
+          themeVariables: {
+            // ── Handbook palette ──────────────────────────────────────
+            primaryColor:        '#eeefff',  // --hb-inline-code-bg
+            primaryTextColor:    '#202285',  // --hb-inline-code-fg
+            primaryBorderColor:  '#b9bbff',  // --hb-accent-soft
+            lineColor:           '#3d41ff',  // --hb-accent
+            secondaryColor:      '#f4f4fc',
+            tertiaryColor:       '#ffffff',
+            // Sequence diagrams
+            actorBkg:            '#eeefff',
+            actorBorder:         '#b9bbff',
+            actorTextColor:      '#202285',
+            actorLineColor:      '#8a8d97',
+            signalColor:         '#3d41ff',
+            signalTextColor:     '#111827',
+            labelBoxBkgColor:    '#eeefff',
+            labelBoxBorderColor: '#b9bbff',
+            labelTextColor:      '#202285',
+            loopTextColor:       '#202285',
+            noteBorderColor:     '#b9bbff',
+            noteBkgColor:        '#f4f4ff',
+            noteTextColor:       '#202285',
+            activationBorderColor: '#3d41ff',
+            activationBkgColor:  '#dfe0ff',
+            fontFamily:          'inherit',
+          },
           securityLevel: 'strict',
           fontFamily: 'inherit',
         })
@@ -47,6 +73,7 @@ export function MermaidDiagram({
             svgEl.removeAttribute('height')
             svgEl.style.maxWidth = '100%'
             svgEl.style.height = 'auto'
+            svgEl.classList.add('hb-seqsvg')
           }
         }
         onStatus?.('rendered')

@@ -2,13 +2,27 @@
 
 import React, { useState } from 'react'
 
-export function CopyButton({ code }: { code: string }): React.JSX.Element {
+export function CopyButton({ code, className, style }: { code: string; className?: string; style?: React.CSSProperties }): React.JSX.Element {
   const [copied, setCopied] = useState(false)
 
   const copy = async () => {
     await navigator.clipboard.writeText(code)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (className) {
+    return (
+      <button
+        type="button"
+        onClick={copy}
+        aria-label={copied ? 'Copied' : 'Copy code'}
+        className={className}
+        style={style}
+      >
+        {copied ? '✓ Copied' : 'Copy'}
+      </button>
+    )
   }
 
   return (

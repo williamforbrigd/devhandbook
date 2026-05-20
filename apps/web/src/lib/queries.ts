@@ -180,7 +180,9 @@ export const articleQuery = `*[_type == "hb.article"
           title,
           "slug": slug.current,
           "section": section->{"slug": slug.current}
-        }
+        },
+        "guide": guide->{_id, title, "slug": slug.current},
+        "section": section->{_id, title, "slug": slug.current}
       },
       _type == "glossaryRef" => {
         ...,
@@ -476,7 +478,9 @@ export const guideBySlugQuery = `*[_type == "hb.guide"
           title,
           "slug": slug.current,
           "section": section->{"slug": slug.current}
-        }
+        },
+        "guide": guide->{_id, title, "slug": slug.current},
+        "section": section->{_id, title, "slug": slug.current}
       },
       _type == "glossaryRef" => {
         ...,
