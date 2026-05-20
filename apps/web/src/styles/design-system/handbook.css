@@ -1151,22 +1151,24 @@ html.dark .hb .hb-cm__detail { background: var(--hb-bg-tinted); }
 .hb-cm--cmp thead th { background: var(--hb-bg-tinted); font-weight: 700; color: var(--hb-fg-title); }
 
 /* ---------- StepList ---------- */
-/* .hb ancestor (body.hb) bumps specificity to (0,2,0), beating .prose ol (0,1,1) and .prose ol > li (0,1,2) which come later in globals.css */
-.hb .hb-steps { list-style: none; padding: 0; margin: 1.25rem 0; display: flex; flex-direction: row; align-items: flex-start; overflow-x: auto; gap: 0; }
-.hb .hb-step { list-style: none; flex: 1; min-width: 140px; display: flex; flex-direction: column; }
-.hb-step__top { display: flex; align-items: center; margin-bottom: 12px; }
-.hb-step__num {
-  width: 32px; height: 32px; border-radius: 9999px; flex-shrink: 0;
-  background: var(--hb-bg-tinted); color: var(--hb-accent);
-  border: 2px solid var(--hb-border-strong);
-  display: inline-flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 13px; z-index: 1;
+.hb-steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.hb-step {
+  display: grid; grid-template-columns: 36px 1fr; gap: 14px;
+  border: 1px solid var(--hb-border);
+  border-left: 3px solid var(--hb-accent);
+  border-radius: 8px;
+  padding: 14px 16px 14px 14px;
+  background: var(--hb-bg);
 }
-.hb-step__connector { flex: 1; height: 2px; background: var(--hb-border); margin-left: 6px; }
-.hb-step__body { padding-right: 16px; }
-.hb-step__head { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
-.hb-step__title { font-size: 14px; font-weight: 700; color: var(--hb-fg-title); letter-spacing: -0.01em; line-height: 1.3; }
-.hb-step__metas { display: inline-flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+.hb-step__num {
+  width: 28px; height: 28px; border-radius: 9999px;
+  background: var(--hb-bg-tinted); color: var(--hb-accent);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px;
+}
+.hb-step__head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; margin-bottom: 4px; }
+.hb-step__title { font-size: 15.5px; font-weight: 700; color: var(--hb-fg-title); letter-spacing: -0.01em; flex: 1; min-width: 0; }
+.hb-step__metas { display: inline-flex; gap: 6px; flex-wrap: wrap; }
 .hb-step__role, .hb-step__dur {
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 11px; font-weight: 600;
