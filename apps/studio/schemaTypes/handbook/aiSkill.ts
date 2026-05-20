@@ -206,6 +206,7 @@ export const aiSkill = defineType({
       title: 'Tested with',
       type: 'array',
       group: 'testing',
+      validation: (rule) => rule.required().warning('The skill does not have a test result'),
       components: { input: TestedWithInput },
       of: [
         {
