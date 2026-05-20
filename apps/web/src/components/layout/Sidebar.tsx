@@ -72,7 +72,15 @@ function ExpertiseFilter({
 
 // ── Nav item ──────────────────────────────────────────────────────────────────
 
-function NavItemLink({ item, activeFilter }: { item: NavItem; activeFilter: Set<string> }) {
+function NavItemLink({
+  item,
+  activeFilter,
+  onNavigate,
+}: {
+  item: NavItem
+  activeFilter: Set<string>
+  onNavigate?: () => void
+}) {
   const pathname = usePathname()
   const article = item.article
   if (!article?.section?.slug) return null
@@ -88,7 +96,7 @@ function NavItemLink({ item, activeFilter }: { item: NavItem; activeFilter: Set<
   const isActive = pathname === href
 
   return (
-    <Link href={href} className={`hb-nav__item${isActive ? ' is-active' : ''}`}>
+    <Link href={href} className={`hb-nav__item${isActive ? ' is-active' : ''}`} onClick={onNavigate}>
       {article.title}
     </Link>
   )
@@ -112,10 +120,12 @@ function NavGroupSection({
   group,
   depth,
   activeFilter,
+  onNavigate,
 }: {
   group: NavGroup
   depth: number
   activeFilter: Set<string>
+  onNavigate?: () => void
 }) {
   const storageKey = `nav-open-${group.title}`
   const [open, setOpen] = useState(true)
@@ -158,9 +168,15 @@ function NavGroupSection({
         <div className="hb-nav__items">
           {(group.items ?? []).filter(Boolean).map((item, i) =>
             item._type === 'navItem' ? (
-              <NavItemLink key={i} item={item as NavItem} activeFilter={activeFilter} />
+              <NavItemLink key={i} item={item as NavItem} activeFilter={activeFilter} onNavigate={onNavigate} />
             ) : (
-              <NavGroupSection key={i} group={item as NavGroup} depth={depth + 1} activeFilter={activeFilter} />
+              <NavGroupSection
+                key={i}
+                group={item as NavGroup}
+                depth={depth + 1}
+                activeFilter={activeFilter}
+                onNavigate={onNavigate}
+              />
             ),
           )}
         </div>
@@ -174,11 +190,14 @@ function NavGroupSection({
 export function SidebarContent({
   navigation,
   expertises,
+  onNavigate,
 }: {
   navigation: NavigationData | null
   expertises: Expertise[]
+  onNavigate?: () => void
 }): React.JSX.Element {
   const [selectedExpertises, setSelectedExpertises] = useState<Set<string>>(new Set())
+  const pathname = usePathname()
 
   const toggleExpertise = useCallback((slug: string) => {
     setSelectedExpertises((prev) => {
@@ -202,8 +221,24 @@ export function SidebarContent({
       />
       <nav className="hb-nav" aria-label="Site navigation">
         {navigation?.groups.map((group, i) => (
-          <NavGroupSection key={i} group={group} depth={0} activeFilter={selectedExpertises} />
+          <NavGroupSection
+            key={i}
+            group={group}
+            depth={0}
+            activeFilter={selectedExpertises}
+            onNavigate={onNavigate}
+          />
         ))}
+      </nav>
+      <nav className="hb-side__utility" aria-label="Handbook utilities">
+        <Link
+          href="/glossary"
+          className={`hb-side__utility-link${pathname === '/glossary' ? ' is-active' : ''}`}
+          onClick={onNavigate}
+        >
+          <Icon name="bookOpen" size={16} />
+          <span>Glossary</span>
+        </Link>
       </nav>
     </aside>
   )
@@ -287,7 +322,7 @@ export function MobileDrawer({
           paddingTop: 56,
         }}
       >
-        <SidebarContent navigation={navigation} expertises={expertises} />
+        <SidebarContent navigation={navigation} expertises={expertises} onNavigate={onClose} />
       </div>
     </>
   )

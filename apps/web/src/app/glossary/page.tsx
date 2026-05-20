@@ -1,28 +1,44 @@
 import type { Metadata } from 'next'
 import { PortableText } from '@portabletext/react'
-import { fetchGlossary } from '../../lib/queries'
+import { fetchGlossary, type GlossaryTermItem } from '../../lib/queries'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { AlphaNav, CopyEntryLink } from './GlossaryClient'
+import styles from './glossary.module.css'
 
 export const metadata: Metadata = { title: 'Glossary' }
 
+const LETTER_PATTERN = /^[A-Å]$/
+
+function getTermLetter(term: string): string {
+  const firstLetter = term.trim().charAt(0).toLocaleUpperCase('nb-NO')
+  return LETTER_PATTERN.test(firstLetter) ? firstLetter : '#'
+}
+
+function groupGlossaryTerms(terms: GlossaryTermItem[]): Record<string, GlossaryTermItem[]> {
+  return terms.reduce<Record<string, GlossaryTermItem[]>>((groups, term) => {
+    if (!term.term?.trim() || !term.slug) return groups
+
+    const letter = getTermLetter(term.term)
+    groups[letter] ??= []
+    groups[letter]!.push(term)
+    return groups
+  }, {})
+}
+
 export default async function GlossaryPage(): Promise<React.JSX.Element> {
   const terms = await fetchGlossary()
-
-  // Group alphabetically
-  const byLetter = terms.reduce<Record<string, typeof terms>>((acc, t) => {
-    const letter = t.term.charAt(0).toUpperCase()
-    if (!acc[letter]) acc[letter] = []
-    acc[letter]!.push(t)
-    return acc
-  }, {})
-  const letters = Object.keys(byLetter).sort()
-  const activeLetters = new Set(letters)
+  const byLetter = groupGlossaryTerms(terms)
+  const letters = Object.keys(byLetter).sort((a, b) => {
+    if (a === '#') return 1
+    if (b === '#') return -1
+    return a.localeCompare(b, 'nb-NO')
+  })
+  const activeLetters = letters.filter((letter) => LETTER_PATTERN.test(letter))
 
   return (
-    <div className="hb-glossary">
+    <div className={styles.root}>
       <h1>Glossary</h1>
-      <p className="hb-glossary__lede">
+      <p className={styles.lede}>
         Fagbegreper og definisjoner brukt i håndboken.
       </p>
 
@@ -30,11 +46,11 @@ export default async function GlossaryPage(): Promise<React.JSX.Element> {
         <AlphaNav activeLetters={activeLetters} active={letters[0]} />
       )}
 
-      {terms.length === 0 && (
+      {letters.length === 0 && (
         <EmptyState
           icon="bookOpen"
           title="Ingen oppslag i ordlisten ennå."
-          body="Bidra gjerne — legg til begreper i Sanity Studio."
+          body="Bidra gjerne - legg til begreper i Sanity Studio."
         />
       )}
 
@@ -42,22 +58,20 @@ export default async function GlossaryPage(): Promise<React.JSX.Element> {
         <div
           key={letter}
           id={`letter-${letter}`}
-          className="hb-gl__group"
-          style={{ scrollMarginTop: 'calc(var(--header-height, 64px) + 16px)' }}
+          className={styles.group}
         >
-          <div className="hb-gl__letter">{letter}</div>
+          <div className={styles.letter}>{letter}</div>
           {byLetter[letter]!.map((term) => (
             <div
               key={term._id}
               id={term.slug}
-              className="hb-gl__entry"
-              style={{ scrollMarginTop: 'calc(var(--header-height, 64px) + 16px)' }}
+              className={styles.entry}
             >
-              <div className="hb-gl__term">
+              <div className={styles.term}>
                 {term.term}
                 <CopyEntryLink slug={term.slug} />
               </div>
-              <div className="hb-gl__def">
+              <div className={styles.definition}>
                 {term.definition?.length > 0 ? (
                   <PortableText value={term.definition} />
                 ) : (

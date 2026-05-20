@@ -62,8 +62,9 @@ export default async function RootLayout({
               </div>
             </div>
 
-            {/* Mobile drawer with state */}
-            <MobileNav navigation={navigation} expertises={expertises} />
+            <div className="show-below-lg">
+              <MobileNav navigation={navigation} expertises={expertises} />
+            </div>
 
             <SanityLive />
             {isDraftMode && <VisualEditing />}

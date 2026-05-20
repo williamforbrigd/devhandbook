@@ -2,8 +2,9 @@
 
 import React, { useCallback, useState } from 'react'
 import { Icon } from '../../components/ui/Icon'
+import styles from './glossary.module.css'
 
-const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ'.split('')
 
 /**
  * Alphabet jump nav — A–Z chips, disabled when no entries start with that
@@ -13,23 +14,31 @@ export function AlphaNav({
   activeLetters,
   active,
 }: {
-  activeLetters: Set<string>
+  activeLetters: string[]
   active?: string
 }): React.JSX.Element {
+  const activeLetterSet = new Set(activeLetters)
+  const [selectedLetter, setSelectedLetter] = useState(active)
+
   return (
-    <div className="hb-alpha">
+    <nav className={styles.alpha} aria-label="Glossary alphabet navigation">
       {ALPHABET.map((l) => {
-        const enabled = activeLetters.has(l)
+        const enabled = activeLetterSet.has(l)
         const className = [
-          'hb-alpha__letter',
-          enabled ? '' : 'is-disabled',
-          l === active ? 'is-active' : '',
+          styles.alphaLetter,
+          enabled ? '' : styles.disabled,
+          l === selectedLetter ? styles.active : '',
         ]
           .filter(Boolean)
           .join(' ')
 
         return enabled ? (
-          <a key={l} href={`#letter-${l}`} className={className}>
+          <a
+            key={l}
+            href={`#letter-${l}`}
+            className={className}
+            onClick={() => setSelectedLetter(l)}
+          >
             {l}
           </a>
         ) : (
@@ -38,13 +47,12 @@ export function AlphaNav({
           </span>
         )
       })}
-    </div>
+    </nav>
   )
 }
 
 /**
- * Copy a deep-link to a glossary entry. Writes `${window.location.origin}
- * ${pathname}#${slug}` to the clipboard.
+ * Copy a deep-link to a glossary entry.
  */
 export function CopyEntryLink({ slug }: { slug: string }): React.JSX.Element {
   const [copied, setCopied] = useState(false)
@@ -63,7 +71,7 @@ export function CopyEntryLink({ slug }: { slug: string }): React.JSX.Element {
   return (
     <button
       type="button"
-      className="hb-gl__copylink"
+      className={styles.copyLink}
       onClick={onClick}
       aria-label={copied ? 'Lenke kopiert' : 'Kopier lenke til oppslag'}
       title={copied ? 'Kopiert' : 'Kopier lenke'}
