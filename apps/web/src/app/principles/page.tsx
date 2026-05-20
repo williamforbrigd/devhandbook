@@ -28,7 +28,7 @@ export default async function PrinciplesPage(): Promise<React.JSX.Element> {
               padding: '20px 24px',
               border: '1px solid var(--color-border)',
               borderRadius: 8,
-              scrollMarginTop: 'calc(var(--header-height) + 16px)',
+              scrollMarginTop: 'calc(var(--sticky-chrome-height) + 16px)',
             }}
           >
             <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--color-border)', minWidth: 28, paddingTop: 2, fontVariantNumeric: 'tabular-nums' }}>

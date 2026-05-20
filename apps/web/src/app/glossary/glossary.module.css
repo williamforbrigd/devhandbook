@@ -63,7 +63,7 @@
 
 .group {
   margin-bottom: 36px;
-  scroll-margin-top: calc(var(--header-height, 64px) + 16px);
+  scroll-margin-top: calc(var(--sticky-chrome-height, 102px) + 16px);
 }
 
 .letter {
@@ -82,7 +82,7 @@
   display: flex;
   gap: 16px;
   align-items: baseline;
-  scroll-margin-top: calc(var(--header-height, 64px) + 16px);
+  scroll-margin-top: calc(var(--sticky-chrome-height, 102px) + 16px);
 }
 
 .entry:last-child {
