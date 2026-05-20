@@ -57,7 +57,13 @@ export default async function Home(): Promise<React.JSX.Element> {
                   <div className="hb-seccard__title">{s.title}</div>
                   {s.description && <div className="hb-seccard__desc">{s.description}</div>}
                   <div className="hb-seccard__foot">
-                    <span className="hb-seccard__meta">{articleCount(s.count)}</span>
+                    <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <span className="hb-seccard__meta">{articleCount(s.count)}</span>
+                      <span className="hb-seccard__guides">
+                        <Icon name="map" size={10} />
+                        {s.guideCount} {s.guideCount === 1 ? 'guide' : 'guides'}
+                      </span>
+                    </span>
                     <span className="hb-seccard__open">
                       Åpne <Icon name="arrowUpRight" size={12} />
                     </span>

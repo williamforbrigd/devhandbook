@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Icon } from '../ui/Icon'
 import { APP_VERSION_LABEL } from '../../lib/version'
-import type { NavGroup, NavItem, Expertise, NavigationData } from '../../lib/queries'
+import type { NavGroup, NavItem, Expertise, NavigationData, SidebarGuide } from '../../lib/queries'
 
 // ── Brand block (top of sidebar) ──────────────────────────────────────────────
 
@@ -185,19 +185,139 @@ function NavGroupSection({
   )
 }
 
+// ── Sidebar mode switcher ─────────────────────────────────────────────────────
+
+function SwitcherPill({
+  mode,
+  onChange,
+  articleCount,
+  guideCount,
+}: {
+  mode: 'articles' | 'guides'
+  onChange: (m: 'articles' | 'guides') => void
+  articleCount: number
+  guideCount: number
+}) {
+  return (
+    <div className="hb-side__switcher" role="tablist" aria-label="Browse mode">
+      <button
+        type="button"
+        role="tab"
+        aria-selected={mode === 'articles'}
+        className={mode === 'articles' ? 'is-active' : ''}
+        onClick={() => onChange('articles')}
+      >
+        <Icon name="fileText" size={11} />
+        Artikler
+        <span className="hb-side__switcher__count">{articleCount}</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={mode === 'guides'}
+        className={mode === 'guides' ? 'is-active' : ''}
+        onClick={() => onChange('guides')}
+      >
+        <Icon name="map" size={11} />
+        Guides
+        <span className="hb-side__switcher__count">{guideCount}</span>
+      </button>
+    </div>
+  )
+}
+
+// ── Guides flat list (sidebar guides mode) ────────────────────────────────────
+
+function GuidesFlatList({
+  guides,
+}: {
+  guides: SidebarGuide[]
+}) {
+  const pathname = usePathname()
+
+  // Group guides by first role (or "Annet" if no roles)
+  const groups = new Map<string, SidebarGuide[]>()
+  for (const g of guides) {
+    const groupName = (g.roles ?? [])[0]?.title ?? 'Annet'
+    const existing = groups.get(groupName) ?? []
+    existing.push(g)
+    groups.set(groupName, existing)
+  }
+
+  if (guides.length === 0) {
+    return <p style={{ fontSize: 13, color: 'var(--hb-fg-muted)', padding: '8px 8px' }}>No guides yet.</p>
+  }
+
+  return (
+    <div className="hb-glist">
+      {Array.from(groups.entries()).map(([groupName, items]) => (
+        <React.Fragment key={groupName}>
+          <div className="hb-glist__group">{groupName}</div>
+          {items.map((g) => {
+            const href = `/guides/${g.slug}`
+            const isActive = pathname === href
+            return (
+              <Link
+                key={g._id}
+                href={href}
+                className={`hb-glist__item${isActive ? ' is-active' : ''}`}
+              >
+                <span className="hb-glist__row">
+                  <Icon name="map" size={11} style={{ flex: 'none' }} />
+                  <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {g.title}
+                  </span>
+                  {g.phaseCount > 0 && (
+                    <span className="hb-glist__phases" aria-label={`${g.phaseCount} faser`}>
+                      {Array.from({ length: Math.min(g.phaseCount, 5) }).map((_, i) => (
+                        <span key={i} />
+                      ))}
+                    </span>
+                  )}
+                </span>
+                {g.sectionTitle && (
+                  <span className="hb-glist__meta">{g.sectionTitle}</span>
+                )}
+              </Link>
+            )
+          })}
+        </React.Fragment>
+      ))}
+    </div>
+  )
+}
+
 // ── Sidebar content ───────────────────────────────────────────────────────────
 
 export function SidebarContent({
   navigation,
   expertises,
+  guides,
   onNavigate,
 }: {
   navigation: NavigationData | null
   expertises: Expertise[]
+  guides: SidebarGuide[]
   onNavigate?: () => void
 }): React.JSX.Element {
   const [selectedExpertises, setSelectedExpertises] = useState<Set<string>>(new Set())
+  const [mode, setMode] = useState<'articles' | 'guides'>('articles')
   const pathname = usePathname()
+
+  // Count total nav items for the switcher pill
+  const articleCount = React.useMemo(() => {
+    function countItems(groups: NavGroup[]): number {
+      let n = 0
+      for (const g of groups) {
+        for (const item of g.items ?? []) {
+          if (item._type === 'navItem') n++
+          else n += countItems([item as NavGroup])
+        }
+      }
+      return n
+    }
+    return countItems(navigation?.groups ?? [])
+  }, [navigation])
 
   const toggleExpertise = useCallback((slug: string) => {
     setSelectedExpertises((prev) => {
@@ -210,26 +330,52 @@ export function SidebarContent({
 
   const clearExpertises = useCallback(() => setSelectedExpertises(new Set()), [])
 
+  const segments = pathname.split('/').filter(Boolean)
+  const topLevelRoutes = ['guides', 'ai-skills', 'glossary', 'sections', 'principles', 'design']
+  const isArticlePage = segments.length === 2 && !topLevelRoutes.includes(segments[0] ?? '')
+
+  const showSwitcher = guides.length > 0
+
   return (
     <aside className="hb-side" aria-label="Sidebar">
       <SidebarBrand />
-      <ExpertiseFilter
-        expertises={expertises}
-        selected={selectedExpertises}
-        onToggle={toggleExpertise}
-        onClear={clearExpertises}
-      />
-      <nav className="hb-nav" aria-label="Site navigation">
-        {navigation?.groups.map((group, i) => (
-          <NavGroupSection
-            key={i}
-            group={group}
-            depth={0}
-            activeFilter={selectedExpertises}
-            onNavigate={onNavigate}
-          />
-        ))}
-      </nav>
+      {showSwitcher && (
+        <SwitcherPill
+          mode={mode}
+          onChange={setMode}
+          articleCount={articleCount}
+          guideCount={guides.length}
+        />
+      )}
+      {mode === 'articles' && isArticlePage && (
+        <ExpertiseFilter
+          expertises={expertises}
+          selected={selectedExpertises}
+          onToggle={toggleExpertise}
+          onClear={clearExpertises}
+        />
+      )}
+      {mode === 'articles' && (
+        <nav className="hb-nav" aria-label="Site navigation">
+          {navigation?.groups.map((group, i) => (
+            <NavGroupSection
+              key={i}
+              group={group}
+              depth={0}
+              activeFilter={selectedExpertises}
+              onNavigate={onNavigate}
+            />
+          ))}
+        </nav>
+      )}
+      {mode === 'guides' && (
+        <nav className="hb-nav" aria-label="Guides navigation">
+          <div className="hb-side__sectionlabel" style={{ margin: '4px 8px 8px' }}>
+            Guides — by role
+          </div>
+          <GuidesFlatList guides={guides} />
+        </nav>
+      )}
       <nav className="hb-side__utility" aria-label="Handbook utilities">
         <Link
           href="/glossary"
@@ -281,11 +427,13 @@ export function MobileDrawer({
   onClose,
   navigation,
   expertises,
+  guides,
 }: {
   open: boolean
   onClose: () => void
   navigation: NavigationData | null
   expertises: Expertise[]
+  guides: SidebarGuide[]
 }): React.JSX.Element {
   const drawerRef = useRef<HTMLDivElement>(null)
 
@@ -322,7 +470,7 @@ export function MobileDrawer({
           paddingTop: 56,
         }}
       >
-        <SidebarContent navigation={navigation} expertises={expertises} onNavigate={onClose} />
+        <SidebarContent navigation={navigation} expertises={expertises} guides={guides} onNavigate={onClose} />
       </div>
     </>
   )
