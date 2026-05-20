@@ -19,6 +19,7 @@
   --sidebar-width: 280px;
   --toc-width: 220px;
   --header-height: 56px;
+  --sticky-chrome-height: 102px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -158,7 +159,7 @@ body.hb {
 .prose h2 { font-size: 1.5rem;   margin: 2rem   0 0.75rem; font-weight: 700; }
 .prose h3 { font-size: 1.25rem;  margin: 1.75rem 0 0.5rem;  font-weight: 700; }
 .prose h4 { font-size: 1.0625rem;margin: 1.5rem  0 0.4rem;  font-weight: 700; }
-.prose h2, .prose h3, .prose h4 { color: var(--hb-fg-title); scroll-margin-top: calc(var(--header-height) + 16px); }
+.prose h2, .prose h3, .prose h4 { color: var(--hb-fg-title); scroll-margin-top: calc(var(--sticky-chrome-height) + 16px); }
 .prose a { color: var(--color-link); text-decoration: none; text-underline-offset: 3px; }
 .prose a:hover { text-decoration: underline; }
 .prose strong { font-weight: 700; }
