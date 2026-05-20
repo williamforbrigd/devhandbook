@@ -615,9 +615,10 @@ export const allAiSkillsQuery = `*[_type == "hb.aiSkill"
 ] | order(_updatedAt desc) {
   _id, title,
   "slug": slug.current,
-  summary, useCase, maturity, skillType, targetModel,
+  summary, useCase, maturity, skillType,
+  "targetModel": coalesce(targetModel, []),
   lastVerifiedAt, _updatedAt,
-  "expertises": expertises[]->{title, "slug": slug.current}
+  "expertises": coalesce(expertises[]->{title, "slug": slug.current}, [])
 }`
 
 /** Alias kept for backwards-compat */
@@ -627,21 +628,31 @@ export const aiSkillBySlugQuery = `*[_type == "hb.aiSkill" && slug.current == $s
   _id, title,
   "slug": slug.current,
   summary, useCase, prerequisites,
-  maturity, skillType, targetModel,
-  "expertises": expertises[]->{_id, title, "slug": slug.current},
-  "contributors": contributors[]->{_id, name, "avatarUrl": avatar.asset->url},
+  maturity, skillType,
+  "targetModel": coalesce(targetModel, []),
+  "expertises": coalesce(expertises[]->{_id, title, "slug": slug.current}, []),
+  "contributors": coalesce(contributors[]->{_id, name, "avatarUrl": avatar.asset->url}, []),
   lastVerifiedAt,
-  body,
-  promptArtifact,
-  workflowArtifact,
-  evaluationArtifact,
-  "testedWith": testedWith[]{model, date, outcome, notes},
-  "relatedArticles": relatedArticles[]->{
+  "body": coalesce(body, []),
+  "promptArtifact": promptArtifact{
+    systemPrompt,
+    userPromptTemplate,
+    "variables": coalesce(variables[]{name, description, example}, [])
+  },
+  "workflowArtifact": workflowArtifact{
+    "steps": coalesce(steps[]{title, prompt, expectedOutput, notes}, [])
+  },
+  "evaluationArtifact": evaluationArtifact{
+    "criteria": coalesce(criteria[]{label, description, scoringGuide}, []),
+    rubric
+  },
+  "testedWith": coalesce(testedWith[]{model, date, outcome, notes}, []),
+  "relatedArticles": coalesce(relatedArticles[]->{
     _id, title, "slug": slug.current,
     "section": section->{"slug": slug.current}
-  },
-  "relatedGuides": relatedGuides[]->{_id, title, "slug": slug.current},
-  "relatedSkills": relatedSkills[]->{_id, title, "slug": slug.current, skillType, maturity}
+  }, []),
+  "relatedGuides": coalesce(relatedGuides[]->{_id, title, "slug": slug.current}, []),
+  "relatedSkills": coalesce(relatedSkills[]->{_id, title, "slug": slug.current, skillType, maturity}, [])
 }`
 
 export async function fetchAiSkills(filters: AiSkillFilterParams = {}): Promise<AiSkillListItem[]> {
@@ -668,13 +679,13 @@ export const aiSkillPlainQuery = `*[_type == "hb.aiSkill" && slug.current == $sl
   "prompt": promptArtifact{
     "systemPrompt": systemPrompt.code,
     "userPromptTemplate": userPromptTemplate.code,
-    variables[]{ name, description, example }
+    "variables": coalesce(variables[]{ name, description, example }, [])
   },
   "workflow": workflowArtifact{
-    steps[]{ title, prompt, expectedOutput, notes }
+    "steps": coalesce(steps[]{ title, prompt, expectedOutput, notes }, [])
   },
   "evaluation": evaluationArtifact{
-    criteria[]{ label, description, scoringGuide },
+    "criteria": coalesce(criteria[]{ label, description, scoringGuide }, []),
     "rubric": rubric.code
   }
 }`

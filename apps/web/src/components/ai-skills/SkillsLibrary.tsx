@@ -139,6 +139,7 @@ function CollectionCard({ collection }: { collection: AiCollectionItem }) {
 
 function SkillCard({ skill }: { skill: AiSkillListItem }) {
   const meta = SKILL_TYPE_META[skill.skillType] ?? SKILL_TYPE_META.prompt!
+  const targetModels = skill.targetModel ?? []
   return (
     <a
       href={`/ai-skills/${skill.slug}`}
@@ -217,7 +218,7 @@ function SkillCard({ skill }: { skill: AiSkillListItem }) {
 
       {/* Footer: targetModel badges + last tested */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap', marginTop: 'auto', paddingTop: 4 }}>
-        {skill.targetModel.slice(0, 3).map((m) => (
+        {targetModels.slice(0, 3).map((m) => (
           <span
             key={m}
             style={{
@@ -287,9 +288,11 @@ export function SkillsLibrary({ skills, collections, expertises }: Props): React
 
   const filtered = useMemo(() => {
     let result = skills.filter((s) => {
+      const skillExpertises = s.expertises ?? []
+      const targetModels = s.targetModel ?? []
       if (filterType && s.skillType !== filterType) return false
-      if (filterExpertise && !s.expertises.some((e) => e.slug === filterExpertise)) return false
-      if (filterModel && !s.targetModel.includes(filterModel)) return false
+      if (filterExpertise && !skillExpertises.some((e) => e.slug === filterExpertise)) return false
+      if (filterModel && !targetModels.includes(filterModel)) return false
       if (filterMaturity && s.maturity !== filterMaturity) return false
       return true
     })

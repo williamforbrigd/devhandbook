@@ -53,8 +53,9 @@ function buildPlainText(skill: AiSkillPlain): string {
       parts.push(`\n---\nVariables:\n${varBlock}`)
     }
   } else if (skill.skillType === 'workflow' && skill.workflow) {
+    const steps = skill.workflow.steps ?? []
     parts.push(
-      skill.workflow.steps
+      steps
         .map((step, i) => {
           const lines = [`${i + 1}. ${step.title}`]
           if (step.prompt) lines.push(step.prompt.trim())
@@ -65,7 +66,8 @@ function buildPlainText(skill: AiSkillPlain): string {
         .join('\n\n'),
     )
   } else if (skill.skillType === 'evaluation' && skill.evaluation) {
-    const criteriaBlock = skill.evaluation.criteria
+    const criteria = skill.evaluation.criteria ?? []
+    const criteriaBlock = criteria
       .map((c) => {
         const lines = [`- ${c.label}`]
         if (c.description) lines.push(`  ${c.description.trim()}`)
