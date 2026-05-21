@@ -171,6 +171,39 @@ export const articleQuery = `*[_type == "hb.article"
         }
       }
     },
+    _type == "hb.conceptModel" => {
+      ...,
+      "items": items[]{
+        ...,
+        "content": content[]{
+          ...,
+          _type == "hb.hotspotFigure" => { ..., "imageUrl": image.asset->url },
+          _type == "hb.skillEmbed" => {
+            "skill": skill->{ _id, title, "slug": slug.current, summary, skillType, maturity,
+              "promptArtifact": promptArtifact{ "systemPrompt": systemPrompt.code, "userPromptTemplate": userPromptTemplate.code, variables[]{ name, description, example } }
+            }
+          },
+          _type == "hb.snippetRef" => { ..., "snippet": snippet->{_id, title, "slug": slug.current} },
+          markDefs[]{
+            ...,
+            _type == "internalLink" => { ...,
+              "article": article->{ _id, title, "slug": slug.current, "section": section->{"slug": slug.current} },
+              "guide": guide->{_id, title, "slug": slug.current},
+              "section": section->{_id, title, "slug": slug.current}
+            },
+            _type == "glossaryRef" => { ..., "term": term->{_id, term, "slug": slug.current, definition} },
+            _type == "skillRef" => { ..., "skill": skill->{_id, title, "slug": slug.current} }
+          }
+        }
+      }
+    },
+    _type == "hb.stepList" => {
+      ...,
+      "steps": steps[]{
+        ...,
+        "roles": roles[]->{_id, title}
+      }
+    },
     markDefs[]{
       ...,
       _type == "internalLink" => {
@@ -524,6 +557,39 @@ export const guideBySlugQuery = `*[_type == "hb.guide"
         "evaluationArtifact": evaluationArtifact{
           criteria[]{ label, description, scoringGuide }
         }
+      }
+    },
+    _type == "hb.conceptModel" => {
+      ...,
+      "items": items[]{
+        ...,
+        "content": content[]{
+          ...,
+          _type == "hb.hotspotFigure" => { ..., "imageUrl": image.asset->url },
+          _type == "hb.skillEmbed" => {
+            "skill": skill->{ _id, title, "slug": slug.current, summary, skillType, maturity,
+              "promptArtifact": promptArtifact{ "systemPrompt": systemPrompt.code, "userPromptTemplate": userPromptTemplate.code, variables[]{ name, description, example } }
+            }
+          },
+          _type == "hb.snippetRef" => { ..., "snippet": snippet->{_id, title, "slug": slug.current} },
+          markDefs[]{
+            ...,
+            _type == "internalLink" => { ...,
+              "article": article->{ _id, title, "slug": slug.current, "section": section->{"slug": slug.current} },
+              "guide": guide->{_id, title, "slug": slug.current},
+              "section": section->{_id, title, "slug": slug.current}
+            },
+            _type == "glossaryRef" => { ..., "term": term->{_id, term, "slug": slug.current, definition} },
+            _type == "skillRef" => { ..., "skill": skill->{_id, title, "slug": slug.current} }
+          }
+        }
+      }
+    },
+    _type == "hb.stepList" => {
+      ...,
+      "steps": steps[]{
+        ...,
+        "roles": roles[]->{_id, title}
       }
     },
     markDefs[]{

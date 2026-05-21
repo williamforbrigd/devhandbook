@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { PortableText } from '@portabletext/react'
-import type { PortableTextComponents } from '@portabletext/react'
+import { baseBodyComponents } from './bodyComponents'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -19,25 +19,11 @@ interface Item {
 
 const ACCENT = '#6366f1'
 
-const contentPt: PortableTextComponents = {
-  block: {
-    normal: ({ children }) => (
-      <p style={{ margin: '0 0 0.55em', fontSize: 13, lineHeight: 1.6, color: 'var(--color-text)' }}>
-        {children}
-      </p>
-    ),
-  },
-  marks: {
-    strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
-    em: ({ children }) => <em>{children}</em>,
-  },
-}
-
 function ContentBlocks({ blocks }: { blocks: Item['content'] }) {
   if (!blocks?.length) return null
   return (
-    <div style={{ paddingTop: 2 }}>
-      <PortableText value={blocks} components={contentPt} />
+    <div className="prose">
+      <PortableText value={blocks} components={baseBodyComponents} />
     </div>
   )
 }

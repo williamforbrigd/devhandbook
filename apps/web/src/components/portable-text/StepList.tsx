@@ -34,18 +34,23 @@ const ROLE_COLORS: Record<string, { bg: string; color: string }> = {
 }
 
 function roleStyle(role: string) {
-  const key = role.toLowerCase()
+  const key = role?.toLowerCase() ?? ''
   return ROLE_COLORS[key] ?? { bg: 'var(--color-bg-subtle)', color: 'var(--color-text-muted)' }
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+
+interface Role {
+  _id: string
+  title: string
+}
 
 interface Step {
   _key?: string
   title: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   description?: any[]
-  role?: string
+  roles?: Role[]
   duration?: string
 }
 
@@ -60,7 +65,7 @@ export function StepList({ value }: { value: any }): React.JSX.Element | null {
     <div style={{ margin: '1.25rem 0' }}>
       {steps.map((step, i) => {
         const isLast = i === steps.length - 1
-        const rs = step.role ? roleStyle(step.role) : null
+        const stepRoles = (step.roles ?? []).filter((r): r is Role => r != null)
 
         return (
           <div
@@ -105,23 +110,26 @@ export function StepList({ value }: { value: any }): React.JSX.Element | null {
                   {step.title}
                 </span>
 
-                {/* Role chip */}
-                {step.role && rs && (
-                  <span style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    padding: '1px 8px',
-                    borderRadius: 999,
-                    fontSize: 11,
-                    fontWeight: 600,
-                    background: rs.bg,
-                    color: rs.color,
-                    lineHeight: 1.8,
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {step.role}
-                  </span>
-                )}
+                {/* Role chips */}
+                {stepRoles.map((r, ri) => {
+                  const rs = roleStyle(r.title)
+                  return (
+                    <span key={r._id ?? ri} style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      padding: '1px 8px',
+                      borderRadius: 999,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      background: rs.bg,
+                      color: rs.color,
+                      lineHeight: 1.8,
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {r.title}
+                    </span>
+                  )
+                })}
 
                 {/* Duration chip */}
                 {step.duration && (

@@ -119,6 +119,15 @@ export async function preprocessBody(body: any[]): Promise<any[]> {
         return { ...block, __tabs: tabs }
       }
 
+      if (block._type === 'hb.conceptModel') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const items = await Promise.all((block.items ?? []).map(async (item: any) => ({
+          ...item,
+          content: await preprocessBody(item.content ?? []),
+        })))
+        return { ...block, items }
+      }
+
       return block
     }),
   )
