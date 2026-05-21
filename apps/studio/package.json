@@ -11,7 +11,7 @@
     "typegen:watch": "sanity typegen generate --watch"
   },
   "dependencies": {
-    "@sanity/code-input": "^7.1.0",
+    "@sanity/code-input": "^6.0.4",
     "@sanity/orderable-document-list": "^1.5.1",
     "@sanity/vision": "^3",
     "mermaid": "^11.15.0",
@@ -19,7 +19,7 @@
     "react-compiler-runtime": "^1.0.0",
     "react-dom": "^18",
     "sanity": "^3",
-    "styled-components": "^6"
+    "styled-components": "^6.4.1"
   },
   "devDependencies": {
     "@types/mermaid": "^9.2.0",
