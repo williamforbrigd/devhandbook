@@ -602,7 +602,7 @@ export interface AiSkillData {
   testedWith: { model: string; date: string | null; outcome: string | null; notes: string | null }[]
   relatedArticles: { _id: string; title: string; slug: string; section: { slug: string } }[]
   relatedGuides: { _id: string; title: string; slug: string }[]
-  relatedSkills: { _id: string; title: string; slug: string; skillType: string; maturity: Maturity }[]
+  relatedSkills: { _id: string; title: string; slug: string; skillType: string; summary: string | null; maturity: Maturity }[]
 }
 
 /** Filterable list query — pass null for any param to skip that filter */
@@ -652,7 +652,7 @@ export const aiSkillBySlugQuery = `*[_type == "hb.aiSkill" && slug.current == $s
     "section": section->{"slug": slug.current}
   }, []),
   "relatedGuides": coalesce(relatedGuides[]->{_id, title, "slug": slug.current}, []),
-  "relatedSkills": coalesce(relatedSkills[]->{_id, title, "slug": slug.current, skillType, maturity}, [])
+  "relatedSkills": coalesce(relatedSkills[]->{_id, title, "slug": slug.current, skillType, summary, maturity}, [])
 }`
 
 export async function fetchAiSkills(filters: AiSkillFilterParams = {}): Promise<AiSkillListItem[]> {
@@ -673,6 +673,15 @@ export async function fetchAiSkill(slug: string): Promise<AiSkillData | null> {
   return data as AiSkillData | null
 }
 
+export const allAiSkillParamsQuery = `*[_type == "hb.aiSkill" && hidden != true && defined(slug)]{
+  "slug": slug.current
+}`
+
+export async function fetchAllAiSkillParams(): Promise<{ slug: string }[]> {
+  const data = await client.fetch(allAiSkillParamsQuery)
+  return (data as { slug: string }[]) ?? []
+}
+
 // Minimal query for the plain-text prompt export — only the fields needed
 export const aiSkillPlainQuery = `*[_type == "hb.aiSkill" && slug.current == $slug && hidden != true][0]{
   title, skillType,
@@ -686,7 +695,7 @@ export const aiSkillPlainQuery = `*[_type == "hb.aiSkill" && slug.current == $sl
   },
   "evaluation": evaluationArtifact{
     "criteria": coalesce(criteria[]{ label, description, scoringGuide }, []),
-    "rubric": rubric.code
+    rubric
   }
 }`
 

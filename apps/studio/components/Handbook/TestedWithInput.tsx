@@ -1,6 +1,9 @@
 import React, { useCallback } from 'react'
 import { insert, set } from 'sanity'
+import { Button, Card, Flex, Grid, Label, Select, Stack, Text, TextArea, TextInput } from '@sanity/ui'
+import type { ButtonTone } from '@sanity/ui'
 import type { ArrayOfObjectsInputProps } from 'sanity'
+import { AddIcon, TrashIcon } from '@sanity/icons'
 
 interface TestEntry {
   _key: string
@@ -12,6 +15,12 @@ interface TestEntry {
 
 const MODEL_OPTIONS = ['claude', 'gpt-4', 'gemini', 'other']
 const OUTCOME_OPTIONS = ['passed', 'partial', 'failed']
+
+function getOutcomeTone(outcome: string): ButtonTone {
+  if (outcome === 'passed') return 'positive'
+  if (outcome === 'partial') return 'caution'
+  return 'critical'
+}
 
 export function TestedWithInput(props: ArrayOfObjectsInputProps): React.JSX.Element {
   const { onChange, value = [] } = props
@@ -49,113 +58,113 @@ export function TestedWithInput(props: ArrayOfObjectsInputProps): React.JSX.Elem
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <Stack gap={3}>
       {(value as TestEntry[]).map((entry, i) => (
-        <div
+        <Card
           key={entry._key}
-          style={{
-            padding: 12,
-            border: '1px solid #e5e7eb',
-            borderRadius: 8,
-            background: '#f9fafb',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-          }}
+          border
+          padding={3}
+          radius={2}
+          tone="default"
+          shadow={1}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 600, fontSize: 13, color: '#374151' }}>
-              Test result {i + 1}
-            </span>
-            <button
-              type="button"
-              onClick={() => handleRemove(entry._key)}
-              style={{ fontSize: 11, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 6px' }}
-            >
-              Remove
-            </button>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase' }}>Model</span>
-              <select
-                value={entry.model ?? ''}
-                onChange={(e) => handleUpdate(entry._key, 'model', e.target.value)}
-                style={{ padding: '6px 8px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13, background: '#fff' }}
-              >
-                <option value="">Select model…</option>
-                {MODEL_OPTIONS.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
-            </label>
-
-            <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase' }}>Date</span>
-              <input
-                type="date"
-                value={entry.date ? entry.date.slice(0, 10) : ''}
-                onChange={(e) => handleUpdate(entry._key, 'date', new Date(e.target.value).toISOString())}
-                style={{ padding: '6px 8px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13, background: '#fff' }}
+          <Stack gap={3}>
+            <Flex align="center" justify="space-between" gap={3}>
+              <Text size={1} weight="semibold">
+                Test result {i + 1}
+              </Text>
+              <Button
+                icon={TrashIcon}
+                mode="bleed"
+                padding={2}
+                text="Remove"
+                tone="critical"
+                type="button"
+                fontSize={1}
+                onClick={() => handleRemove(entry._key)}
               />
-            </label>
-          </div>
+            </Flex>
 
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase' }}>Outcome</span>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {OUTCOME_OPTIONS.map((o) => (
-                <button
-                  key={o}
-                  type="button"
-                  onClick={() => handleUpdate(entry._key, 'outcome', o)}
-                  style={{
-                    padding: '4px 12px',
-                    borderRadius: 99,
-                    border: `1.5px solid ${entry.outcome === o ? (o === 'passed' ? '#16a34a' : o === 'partial' ? '#d97706' : '#dc2626') : '#d1d5db'}`,
-                    background: entry.outcome === o ? (o === 'passed' ? '#dcfce7' : o === 'partial' ? '#fef3c7' : '#fee2e2') : '#fff',
-                    color: entry.outcome === o ? (o === 'passed' ? '#16a34a' : o === 'partial' ? '#d97706' : '#dc2626') : '#6b7280',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
+            <Grid gridTemplateColumns={[1, 1, 2]} gap={3}>
+              <Stack as="label" gap={2}>
+                <Label muted size={0} weight="semibold">
+                  Model
+                </Label>
+                <Select
+                  value={entry.model ?? ''}
+                  onChange={(e) => handleUpdate(entry._key, 'model', e.currentTarget.value)}
+                  padding={2}
+                  radius={2}
+                  fontSize={1}
                 >
-                  {o}
-                </button>
-              ))}
-            </div>
-          </label>
+                  <option value="">Select model…</option>
+                  {MODEL_OPTIONS.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </Select>
+              </Stack>
 
-          <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600, textTransform: 'uppercase' }}>Notes</span>
-            <textarea
-              value={entry.notes ?? ''}
-              onChange={(e) => handleUpdate(entry._key, 'notes', e.target.value)}
-              rows={2}
-              style={{ padding: '6px 8px', border: '1px solid #d1d5db', borderRadius: 4, fontSize: 13, resize: 'vertical', fontFamily: 'inherit', background: '#fff' }}
-            />
-          </label>
-        </div>
+              <Stack as="label" gap={2}>
+                <Label muted size={0} weight="semibold">
+                  Date
+                </Label>
+                <TextInput
+                  type="date"
+                  value={entry.date ? entry.date.slice(0, 10) : ''}
+                  onChange={(e) => handleUpdate(entry._key, 'date', new Date(e.currentTarget.value).toISOString())}
+                  padding={2}
+                  radius={2}
+                  fontSize={1}
+                />
+              </Stack>
+            </Grid>
+
+            <Stack space={2}>
+              <Label muted size={0} weight="semibold">
+                Outcome
+              </Label>
+              <Flex wrap="wrap" gap={2}>
+                {OUTCOME_OPTIONS.map((outcome) => (
+                  <Button
+                    key={outcome}
+                    type="button"
+                    onClick={() => handleUpdate(entry._key, 'outcome', outcome)}
+                    mode={entry.outcome === outcome ? 'default' : 'ghost'}
+                    selected={entry.outcome === outcome}
+                    tone={getOutcomeTone(outcome)}
+                    text={outcome}
+                    padding={2}
+                    radius={4}
+                    fontSize={1}
+                  />
+                ))}
+              </Flex>
+            </Stack>
+
+            <Stack as="label" gap={2}>
+              <Label muted size={0} weight="semibold">
+                Notes
+              </Label>
+              <TextArea
+                value={entry.notes ?? ''}
+                onChange={(e) => handleUpdate(entry._key, 'notes', e.currentTarget.value)}
+                rows={2}
+                padding={2}
+                radius={2}
+                fontSize={1}
+              />
+            </Stack>
+          </Stack>
+        </Card>
       ))}
 
-      <button
-        type="button"
+      <Button
+        icon={AddIcon}
+        mode="ghost"
         onClick={handleAdd}
-        style={{
-          padding: '8px 16px',
-          background: '#1d4ed8',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 6,
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: 'pointer',
-          alignSelf: 'flex-start',
-        }}
-      >
-        + Add test result
-      </button>
-    </div>
+        text="Add test result"
+        type="button"
+      />
+    </Stack>
   )
 }

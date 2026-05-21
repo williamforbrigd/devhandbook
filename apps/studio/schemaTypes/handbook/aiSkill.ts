@@ -9,7 +9,7 @@ export const aiSkill = defineType({
   title: 'AI Skill',
   type: 'document',
   groups: [
-    { name: 'content', title: 'Content', default: true },
+    { name: 'content', title: 'Content' },
     { name: 'artifact', title: 'Artifact' },
     { name: 'classification', title: 'Classification' },
     { name: 'testing', title: 'Testing' },
@@ -191,7 +191,7 @@ export const aiSkill = defineType({
               type: 'object',
               fields: [
                 defineField({ name: 'label', title: 'Label', type: 'string' }),
-                defineField({ name: 'description', title: 'Description', type: 'string' }),
+                defineField({ name: 'description', title: 'Description', type: 'text' }),
                 defineField({ name: 'scoringGuide', title: 'Scoring guide', type: 'text' }),
               ],
               preview: { select: { title: 'label' } },

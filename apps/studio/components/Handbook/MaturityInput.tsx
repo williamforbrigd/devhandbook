@@ -1,5 +1,6 @@
 import React from 'react'
 import { set, unset } from 'sanity'
+import { Box, Card, Flex, Stack, Text } from '@sanity/ui'
 import type { StringInputProps } from 'sanity'
 
 const OPTIONS = [
@@ -8,28 +9,24 @@ const OPTIONS = [
     label: 'Established',
     description: 'Velprøvd, bredt brukt i miljøet',
     color: '#16a34a',
-    bg: '#dcfce7',
   },
   {
     value: 'recommended',
     label: 'Recommended',
     description: 'Anbefalt, noe mindre erfaring',
     color: '#2563eb',
-    bg: '#dbeafe',
   },
   {
     value: 'exploratory',
     label: 'Exploratory',
     description: 'Under utforskning — bruk med bevissthet',
     color: '#d97706',
-    bg: '#fef3c7',
   },
   {
     value: 'deprecated',
     label: 'Deprecated',
     description: 'Frarådet — bevart for kontekst',
     color: '#dc2626',
-    bg: '#fee2e2',
   },
 ]
 
@@ -37,46 +34,49 @@ export function MaturityInput(props: StringInputProps): React.JSX.Element {
   const { value, onChange } = props
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <Stack gap={2}>
       {OPTIONS.map((opt) => {
         const selected = value === opt.value
         return (
-          <button
+          <Card
+            as="button"
             key={opt.value}
             type="button"
+            border
+            padding={3}
+            pressed={selected}
+            radius={2}
             onClick={() => onChange(selected ? unset() : set(opt.value))}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              padding: '10px 14px',
-              borderRadius: 6,
-              border: `2px solid ${selected ? opt.color : '#e5e7eb'}`,
-              background: selected ? opt.bg : '#fff',
+              borderColor: selected ? opt.color : undefined,
               cursor: 'pointer',
               textAlign: 'left',
-              transition: 'border-color 0.15s, background 0.15s',
+              transition: 'border-color 0.15s ease',
+              width: '100%',
             }}
           >
-            <span
-              style={{
-                display: 'inline-block',
-                width: 12,
-                height: 12,
-                borderRadius: '50%',
-                background: opt.color,
-                flexShrink: 0,
-              }}
-            />
-            <span style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <span style={{ fontWeight: 600, fontSize: 13, color: selected ? opt.color : '#111' }}>
-                {opt.label}
-              </span>
-              <span style={{ fontSize: 12, color: '#6b7280' }}>{opt.description}</span>
-            </span>
-          </button>
+            <Flex align="center" gap={3}>
+              <Box
+                flex="none"
+                style={{
+                  background: opt.color,
+                  borderRadius: '50%',
+                  height: 12,
+                  width: 12,
+                }}
+              />
+              <Stack gap={2}>
+                <Text size={1} weight="semibold" style={{ color: selected ? opt.color : undefined }}>
+                  {opt.label}
+                </Text>
+                <Text muted size={1}>
+                  {opt.description}
+                </Text>
+              </Stack>
+            </Flex>
+          </Card>
         )
       })}
-    </div>
+    </Stack>
   )
 }

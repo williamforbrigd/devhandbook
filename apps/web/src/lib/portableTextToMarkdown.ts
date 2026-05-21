@@ -431,3 +431,110 @@ export function guideToMarkdown(meta: GuideFrontmatter, body: any[]): string {
 
   return lines.join('\n') + '\n'
 }
+
+// ── AI skill-level serialiser ────────────────────────────────────────────────
+
+interface AiSkillMarkdownData {
+  title: string
+  slug: string
+  summary: string | null
+  useCase: string | null
+  prerequisites: string | null
+  maturity: string
+  skillType: string
+  targetModel: string[]
+  expertises: { title: string }[]
+  lastVerifiedAt: string | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body: any[]
+  promptArtifact: {
+    systemPrompt: { code: string } | null
+    userPromptTemplate: { code: string } | null
+    variables: { name: string; description: string | null; example: string | null }[]
+  } | null
+  workflowArtifact: {
+    steps: { title: string; prompt: string | null; expectedOutput: string | null; notes: string | null }[]
+  } | null
+  evaluationArtifact: {
+    criteria: { label: string; description: string | null; scoringGuide: string | null }[]
+    rubric: string | null
+  } | null
+}
+
+function renderAiSkillArtifact(skill: AiSkillMarkdownData): string {
+  const lines: string[] = []
+
+  if (skill.skillType === 'prompt' && skill.promptArtifact) {
+    const { systemPrompt, userPromptTemplate, variables } = skill.promptArtifact
+    if (systemPrompt?.code) {
+      lines.push('## System prompt', '', '```text', systemPrompt.code, '```')
+    }
+    if (userPromptTemplate?.code) {
+      lines.push('', '## User prompt template', '', '```text', userPromptTemplate.code, '```')
+    }
+    if ((variables ?? []).length > 0) {
+      lines.push('', '## Variables')
+      for (const variable of variables) {
+        const example = variable.example ? ` Example: ${variable.example}` : ''
+        lines.push(`- \`{{${variable.name}}}\`: ${variable.description ?? ''}${example}`)
+      }
+    }
+  }
+
+  if (skill.skillType === 'workflow' && skill.workflowArtifact) {
+    lines.push('## Workflow')
+    skill.workflowArtifact.steps.forEach((step, index) => {
+      lines.push('', `${index + 1}. **${step.title}**`)
+      if (step.prompt) lines.push('', '```text', step.prompt, '```')
+      if (step.expectedOutput) lines.push(`Expected output: ${step.expectedOutput}`)
+      if (step.notes) lines.push(`Notes: ${step.notes}`)
+    })
+  }
+
+  if (skill.skillType === 'evaluation' && skill.evaluationArtifact) {
+    const { criteria, rubric } = skill.evaluationArtifact
+    if ((criteria ?? []).length > 0) {
+      lines.push('## Criteria')
+      for (const criterion of criteria) {
+        lines.push('', `### ${criterion.label}`)
+        if (criterion.description) lines.push(criterion.description)
+        if (criterion.scoringGuide) lines.push('', `Scoring: ${criterion.scoringGuide}`)
+      }
+    }
+    if (rubric) lines.push('', '## Rubric', '', '```text', rubric, '```')
+  }
+
+  return lines.filter((line, index, arr) => line !== '' || arr[index - 1] !== '').join('\n')
+}
+
+export function aiSkillToMarkdown(skill: AiSkillMarkdownData): string {
+  const fm: (string | null)[] = [
+    '---',
+    `title: "${skill.title.replace(/"/g, '\\"')}"`,
+    `slug: ${skill.slug}`,
+    `type: ai-skill`,
+    `skillType: ${skill.skillType}`,
+    `maturity: ${skill.maturity}`,
+    skill.lastVerifiedAt ? `lastVerifiedAt: ${skill.lastVerifiedAt}` : null,
+    skill.targetModel.length > 0
+      ? `targetModel: [${skill.targetModel.map((model) => `"${model}"`).join(', ')}]`
+      : null,
+    skill.expertises.length > 0
+      ? `expertises: [${skill.expertises.map((expertise) => `"${expertise.title}"`).join(', ')}]`
+      : null,
+    '---',
+  ]
+
+  const lines = [fm.filter(Boolean).join('\n'), '', `# ${skill.title}`]
+  if (skill.summary) lines.push('', skill.summary)
+  if (skill.useCase) lines.push('', '## Use case', '', skill.useCase)
+  if (skill.prerequisites) lines.push('', '## Prerequisites', '', skill.prerequisites)
+
+  const artifact = renderAiSkillArtifact(skill)
+  if (artifact) lines.push('', artifact)
+
+  const content = portableTextToMarkdown(skill.body ?? [])
+  if (content) lines.push('', content)
+
+  return lines.join('\n') + '\n'
+}

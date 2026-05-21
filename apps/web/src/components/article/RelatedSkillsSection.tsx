@@ -53,7 +53,7 @@ export function RelatedSkillsSection({ skills }: { skills: RelatedSkill[] }): Re
             color: 'color-mix(in srgb, var(--color-indigo, #6366f1) 80%, var(--color-text))',
           }}
         >
-          AI Skills du kan bruke nå
+          Relaterte skills
         </h2>
       </div>
 
