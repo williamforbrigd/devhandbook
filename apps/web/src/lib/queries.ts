@@ -184,6 +184,14 @@ export const articleQuery = `*[_type == "hb.article"
             }
           },
           _type == "hb.snippetRef" => { ..., "snippet": snippet->{_id, title, "slug": slug.current} },
+          _type == "hb.stepList" => {
+            ...,
+            "steps": steps[]{
+              _key, title, duration,
+              description,
+              "roles": roles[]->{_id, title}
+            }
+          },
           markDefs[]{
             ...,
             _type == "internalLink" => { ...,
@@ -200,7 +208,8 @@ export const articleQuery = `*[_type == "hb.article"
     _type == "hb.stepList" => {
       ...,
       "steps": steps[]{
-        ...,
+        _key, title, duration,
+        description,
         "roles": roles[]->{_id, title}
       }
     },
@@ -572,6 +581,14 @@ export const guideBySlugQuery = `*[_type == "hb.guide"
             }
           },
           _type == "hb.snippetRef" => { ..., "snippet": snippet->{_id, title, "slug": slug.current} },
+          _type == "hb.stepList" => {
+            ...,
+            "steps": steps[]{
+              _key, title, duration,
+              description,
+              "roles": roles[]->{_id, title}
+            }
+          },
           markDefs[]{
             ...,
             _type == "internalLink" => { ...,
@@ -588,7 +605,8 @@ export const guideBySlugQuery = `*[_type == "hb.guide"
     _type == "hb.stepList" => {
       ...,
       "steps": steps[]{
-        ...,
+        _key, title, duration,
+        description,
         "roles": roles[]->{_id, title}
       }
     },
