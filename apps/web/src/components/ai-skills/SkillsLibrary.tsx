@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import type { AiSkillListItem, AiCollectionItem, Expertise, Maturity } from '../../lib/queries'
+import { TARGET_MODELS } from '@/types/ai_models';
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
 
@@ -17,8 +18,6 @@ const MATURITY_ORDER: Record<Maturity, number> = {
   exploratory: 2,
   deprecated: 3,
 }
-
-const TARGET_MODEL_OPTIONS = ['Claude', 'GPT-4o', 'Gemini', 'Model-agnostic']
 
 type SortKey = 'updated' | 'maturity' | 'alpha'
 
@@ -308,29 +307,6 @@ export function SkillsLibrary({ skills, collections, expertises }: Props): React
 
   return (
     <div>
-      {/* ── Collections ──────────────────────────────────────────────────── */}
-      {collections.length > 0 && (
-        <section style={{ marginBottom: 40 }}>
-          <h2
-            style={{
-              margin: '0 0 14px',
-              fontSize: 12,
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              color: 'var(--color-text-muted)',
-            }}
-          >
-            Samlinger
-          </h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
-            {collections.map((c) => (
-              <CollectionCard key={c._id} collection={c} />
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* ── Filter panel ─────────────────────────────────────────────────── */}
       <div
         style={{
@@ -365,12 +341,12 @@ export function SkillsLibrary({ skills, collections, expertises }: Props): React
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: 4, whiteSpace: 'nowrap' }}>
             Modell
           </span>
-          {TARGET_MODEL_OPTIONS.map((m) => (
+          {TARGET_MODELS.map((m) => (
             <FilterChip
-              key={m}
-              label={m}
-              active={filterModel === m}
-              onClick={() => setFilterModel(filterModel === m ? null : m)}
+              key={m.value}
+              label={m.label}
+              active={filterModel === m.value}
+              onClick={() => setFilterModel(filterModel === m.value ? null : m.value)}
             />
           ))}
         </div>
@@ -397,7 +373,7 @@ export function SkillsLibrary({ skills, collections, expertises }: Props): React
           <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginRight: 4, whiteSpace: 'nowrap' }}>
             Modenhet
           </span>
-          {(['recommended', 'established', 'exploratory'] as Maturity[]).map((m) => (
+          {(['established', 'recommended', 'exploratory', 'deprecated'] as Maturity[]).map((m) => (
             <FilterChip
               key={m}
               label={MATURITY_STYLE[m].label}
@@ -505,12 +481,36 @@ export function SkillsLibrary({ skills, collections, expertises }: Props): React
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
             gap: 14,
+            marginBottom: 40
           }}
         >
           {filtered.map((skill) => (
             <SkillCard key={skill._id} skill={skill} />
           ))}
         </div>
+      )}
+
+      {/* ── Collections ──────────────────────────────────────────────────── */}
+      {collections.length > 0 && (
+        <section>
+          <h2
+            style={{
+              margin: '0 0 14px',
+              fontSize: 12,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'var(--color-text-muted)',
+            }}
+          >
+            Samlinger
+          </h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14 }}>
+            {collections.map((c) => (
+              <CollectionCard key={c._id} collection={c} />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   )
