@@ -3,6 +3,7 @@ import { structureTool } from 'sanity/structure'
 import { presentationTool, defineDocuments } from 'sanity/presentation'
 import { visionTool } from '@sanity/vision'
 import { codeInput } from '@sanity/code-input'
+import { table } from '@sanity/table'
 import { orderableDocumentListDeskItem } from '@sanity/orderable-document-list'
 import { handbookSchemaTypes } from './schemaTypes/handbook'
 import { structure } from './structure'
@@ -51,6 +52,7 @@ export default defineConfig({
     presentationTool({ previewUrl, resolve: { mainDocuments } }),
     visionTool(),
     codeInput(),
+    table(),
   ],
   document: {
     actions(prev, { schemaType }) {

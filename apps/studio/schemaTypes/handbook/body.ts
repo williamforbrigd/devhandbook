@@ -187,6 +187,12 @@ const coreMembers = [
       },
     }),
 
+    // ── table ───────────────────────────────────────────────────────────────
+    defineArrayMember({
+      type: 'table',
+      title: 'Table',
+    }),
+
     // ── hb.imageBlock ───────────────────────────────────────────────────────
     defineArrayMember({
       name: 'hb.imageBlock',

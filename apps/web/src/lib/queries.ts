@@ -153,6 +153,10 @@ export const articleQuery = `*[_type == "hb.article"
       ...,
       "imageUrl": image.asset->url
     },
+    _type == "hb.imageBlock" => {
+      ...,
+      "imageUrl": asset.asset->url
+    },
     _type == "hb.skillEmbed" => {
       "skill": skill->{
         _id, title,
@@ -549,6 +553,10 @@ export const guideBySlugQuery = `*[_type == "hb.guide"
     _type == "hb.hotspotFigure" => {
       ...,
       "imageUrl": image.asset->url
+    },
+    _type == "hb.imageBlock" => {
+      ...,
+      "imageUrl": asset.asset->url
     },
     _type == "hb.skillEmbed" => {
       "skill": skill->{

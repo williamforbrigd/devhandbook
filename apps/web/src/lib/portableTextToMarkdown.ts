@@ -241,7 +241,7 @@ function renderSkillEmbed(block: any): string {
 }
 
 function renderFigure(block: any): string {
-  const url = block.imageUrl ?? block.asset?.url ?? ''
+  const url = block.imageUrl ?? block.asset?.url ?? block.asset?.asset?.url ?? ''
   const alt = block.alt ?? block.caption ?? ''
   const caption = block.caption ? `\n*${block.caption}*` : ''
   return `![${alt}](${url})${caption}`
@@ -253,8 +253,20 @@ function renderEmbed(block: any): string {
   return `> 🔗 ${title}`
 }
 
+type TableRow = any[] | { cells?: any[] }
+
+function normalizeTableRows(rows: TableRow[]): any[][] {
+  return rows.map((row) => Array.isArray(row) ? row : row.cells ?? [])
+}
+
+function normalizeTableShape(rows: any[][]): any[][] {
+  const columnCount = Math.max(0, ...rows.map((row) => row.length))
+  if (columnCount === 0) return []
+  return rows.map((row) => Array.from({ length: columnCount }, (_, i) => row[i] ?? ''))
+}
+
 function renderTable(block: any): string {
-  const rows: any[][] = block.rows ?? []
+  const rows = normalizeTableShape(normalizeTableRows(block.rows ?? []))
   if (rows.length === 0) return ''
   const [header, ...body] = rows
   if (!header) return ''
@@ -325,9 +337,9 @@ export function portableTextToMarkdown(blocks: any[]): string {
     if (type === 'hb.hotspotFigure')  { output.push(renderHotspotFigure(block));  continue }
     if (type === 'hb.conceptModel')   { output.push(renderConceptModel(block));   continue }
     if (type === 'hb.skillEmbed')     { output.push(renderSkillEmbed(block));     continue }
-    if (type === 'hb.figure' || type === 'image') { output.push(renderFigure(block)); continue }
+    if (type === 'hb.figure' || type === 'hb.imageBlock' || type === 'image') { output.push(renderFigure(block)); continue }
     if (type === 'hb.embed')          { output.push(renderEmbed(block));          continue }
-    if (type === 'hb.table')          { output.push(renderTable(block));          continue }
+    if (type === 'hb.table' || type === 'table') { output.push(renderTable(block)); continue }
     if (type === 'hb.codeGroup') {
       // Render each tab's code block
       for (const tab of block.tabs ?? []) {

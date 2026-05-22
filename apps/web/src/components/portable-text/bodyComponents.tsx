@@ -42,7 +42,7 @@ function HeadingAnchor({ level, children, value }: { level: 2 | 3 | 4; children:
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function Figure({ value }: { value: any }) {
-  const url = value?.asset?.url
+  const url = value?.imageUrl ?? value?.asset?.url ?? value?.asset?.asset?.url
   if (!url) return null
   return (
     <figure style={{ margin: '1.5rem 0', textAlign: 'center' }}>
@@ -61,11 +61,36 @@ function Figure({ value }: { value: any }) {
   )
 }
 
-// ── Table ─────────────────────────────────────────────────────────────────────
+// ── Table ────────────────────────────────────────────────────────────────────
+
+type TableRow = string[] | { cells?: unknown[] }
+
+function cellText(cell: unknown): string {
+  if (typeof cell === 'string') return cell
+  if (typeof cell === 'number' || typeof cell === 'boolean') return String(cell)
+  if (cell && typeof cell === 'object' && 'text' in cell) {
+    const text = (cell as { text?: unknown }).text
+    return typeof text === 'string' ? text : ''
+  }
+  return ''
+}
+
+function normalizeTableRows(rows: TableRow[]): string[][] {
+  return rows.map((row) => {
+    const cells = Array.isArray(row) ? row : row.cells ?? []
+    return cells.map(cellText)
+  })
+}
+
+function normalizeTableShape(rows: string[][]): string[][] {
+  const columnCount = Math.max(0, ...rows.map((row) => row.length))
+  if (columnCount === 0) return []
+  return rows.map((row) => Array.from({ length: columnCount }, (_, i) => row[i] ?? ''))
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function TableBlock({ value }: { value: any }) {
-  const rows: string[][] = value?.rows ?? []
+  const rows = normalizeTableShape(normalizeTableRows(value?.rows ?? []))
   if (rows.length === 0) return null
   const [head, ...body] = rows
   if (!head) return null
@@ -77,7 +102,7 @@ function TableBlock({ value }: { value: any }) {
           <tr>
             {head.map((cell, i) => (
               <th key={i} style={{ padding: '8px 12px', textAlign: 'left', background: 'var(--color-surface)', borderBottom: '2px solid var(--color-border)', fontWeight: 600 }}>
-                {cell}
+                {cell || '\u00a0'}
               </th>
             ))}
           </tr>
@@ -87,7 +112,7 @@ function TableBlock({ value }: { value: any }) {
             <tr key={ri}>
               {row.map((cell, ci) => (
                 <td key={ci} style={{ padding: '8px 12px', borderBottom: '1px solid var(--color-border)' }}>
-                  {cell}
+                  {cell || '\u00a0'}
                 </td>
               ))}
             </tr>
@@ -191,6 +216,8 @@ export const baseBodyComponents: PortableTextComponents = {
     'hb.checklist':       Checklist,
     'hb.stepList':        StepList,
     'hb.table':           TableBlock,
+    'hb.imageBlock':      Figure,
+    table:                TableBlock,
     image:                Figure,
   },
 }
