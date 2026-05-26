@@ -47,6 +47,15 @@ function renderSpan(span: any, markDefs: any[]): string {
     } else if (def._type === 'internalLink' && def.article) {
       const href = `/${def.article.section?.slug ?? ''}/${def.article.slug ?? ''}`
       result = `[${result}](${href})`
+    } else if (def._type === 'internalLink' && def.guide) {
+      result = `[${result}](/guides/${def.guide.slug ?? ''})`
+    } else if (def._type === 'internalLink' && def.section) {
+      result = `[${result}](/${def.section.slug ?? ''})`
+    } else if (def._type === 'internalLink' && def.domain) {
+      result = `[${result}](/methods/${def.domain.slug ?? ''})`
+    } else if (def._type === 'internalLink' && def.method) {
+      const href = `/methods/${def.method.domain?.slug ?? ''}/${def.method.slug ?? ''}`
+      result = `[${result}](${href})`
     } else if (def._type === 'glossaryRef' && def.term) {
       result = `[${result}](/glossary#${def.term.slug ?? ''})`
     } else if (def._type === 'skillRef' && def.skill) {
@@ -376,6 +385,36 @@ export function articleToMarkdown(meta: ArticleFrontmatter, body: any[]): string
     `section: ${meta.section}`,
     `maturity: ${meta.maturity}`,
     meta.lastVerifiedAt ? `lastVerifiedAt: ${meta.lastVerifiedAt}` : null,
+    (meta.expertises ?? []).length > 0
+      ? `expertises: [${meta.expertises!.map((e) => `"${e}"`).join(', ')}]`
+      : null,
+    '---',
+  ]
+    .filter(Boolean)
+    .join('\n')
+
+  const content = portableTextToMarkdown(body)
+  return `${fm}\n\n# ${meta.title}\n\n${content}\n`
+}
+
+// ── Method-level serialiser ──────────────────────────────────────────────────
+
+interface MethodFrontmatter {
+  title: string
+  slug: string
+  domain: string
+  methodType: string
+  expertises?: string[]
+}
+
+export function methodToMarkdown(meta: MethodFrontmatter, body: any[]): string {
+  const fm = [
+    '---',
+    `title: "${meta.title.replace(/"/g, '\\"')}"`,
+    `slug: ${meta.slug}`,
+    `type: method`,
+    `domain: ${meta.domain}`,
+    `methodType: ${meta.methodType}`,
     (meta.expertises ?? []).length > 0
       ? `expertises: [${meta.expertises!.map((e) => `"${e}"`).join(', ')}]`
       : null,

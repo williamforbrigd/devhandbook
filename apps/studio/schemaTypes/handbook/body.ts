@@ -53,6 +53,8 @@ const coreMembers = [
               defineField({ name: 'article', type: 'reference', to: [{ type: 'hb.article' }] }),
               defineField({ name: 'guide', type: 'reference', to: [{ type: 'hb.guide' }] }),
               defineField({ name: 'section', type: 'reference', to: [{ type: 'hb.section' }] }),
+              defineField({ name: 'domain', type: 'reference', to: [{ type: 'hb.domain' }] }),
+              defineField({ name: 'method', type: 'reference', to: [{ type: 'hb.method' }] }),
             ],
           },
           {
