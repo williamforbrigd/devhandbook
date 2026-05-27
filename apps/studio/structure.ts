@@ -14,6 +14,10 @@ export async function structure(S: StructureBuilder, context: StructureResolverC
     `*[_type == "hb.domain"] | order(title asc) { _id, title, "slug": slug.current }`,
   )
 
+  const expertises: Array<{ _id: string; title: string }> = await client.fetch(
+    `*[_type == "hb.expertise"] | order(title asc) { _id, title }`,
+  )
+
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   const articlesBySectionList = (sectionId: string, sectionTitle: string) =>
@@ -50,6 +54,18 @@ export async function structure(S: StructureBuilder, context: StructureResolverC
           .schemaType('hb.method')
           .filter('_type == "hb.method" && domain._ref == $domainId && !hidden')
           .params({ domainId }),
+      )
+
+  const methodsByExpertiseList = (expertiseId: string, expertiseTitle: string) =>
+    S.listItem()
+      .id(`methods-expertise-${expertiseId}`)
+      .title(expertiseTitle)
+      .child(
+        S.documentList()
+          .title(`${expertiseTitle} — Methods`)
+          .schemaType('hb.method')
+          .filter('_type == "hb.method" && $expertiseId in expertises[]._ref')
+          .params({ expertiseId }),
       )
 
   // ── Documentation group ──────────────────────────────────────────────────
@@ -157,6 +173,14 @@ export async function structure(S: StructureBuilder, context: StructureResolverC
               S.list()
                 .title('Methods by domain')
                 .items(domains.map((domain) => methodsByDomainList(domain._id, domain.title))),
+            ),
+          S.listItem()
+            .id('poc-methods-by-expertise')
+            .title('By expertise')
+            .child(
+              S.list()
+                .title('Methods by expertise')
+                .items(expertises.map((exp) => methodsByExpertiseList(exp._id, exp.title))),
             ),
           S.divider(),
           S.listItem()
