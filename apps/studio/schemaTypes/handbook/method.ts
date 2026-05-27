@@ -115,7 +115,6 @@ export const method = defineType({
       rows: 3,
       group: 'content',
     }),
-    { ...body, group: 'content' },
     defineField({
       name: 'type',
       title: 'Type',
@@ -130,6 +129,7 @@ export const method = defineType({
       },
       validation: (Rule) => Rule.required(),
     }),
+    { ...body, group: 'content' },
     defineField({
       name: 'expertises',
       title: 'Expertises',
