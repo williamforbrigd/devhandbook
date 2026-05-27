@@ -19,6 +19,7 @@ export function Breadcrumb(): React.JSX.Element | null {
 
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length === 0) return null
+  if (segments[0] === 'methods' && segments.length === 3) return null
 
   const crumbs = segments.map((seg, i) => {
     const href = '/' + segments.slice(0, i + 1).join('/')

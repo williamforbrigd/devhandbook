@@ -87,6 +87,65 @@ export async function fetchExpertises(): Promise<Expertise[]> {
   return (data as Expertise[]) ?? []
 }
 
+const bodyProjection = `body[]{
+    ...,
+    _type == "hb.hotspotFigure" => {
+      ...,
+      "imageUrl": image.asset->url
+    },
+    _type == "hb.imageBlock" => {
+      ...,
+      "imageUrl": asset.asset->url
+    },
+    _type == "hb.skillEmbed" => {
+      "skill": skill->{
+        _id, title,
+        "slug": slug.current,
+        summary, skillType, maturity,
+        "promptArtifact": promptArtifact{
+          "systemPrompt": systemPrompt.code,
+          "userPromptTemplate": userPromptTemplate.code,
+          variables[]{ name, description, example }
+        },
+        "workflowArtifact": workflowArtifact{
+          steps[]{ title, prompt, expectedOutput, notes }
+        },
+        "evaluationArtifact": evaluationArtifact{
+          criteria[]{ label, description, scoringGuide }
+        }
+      }
+    },
+    markDefs[]{
+      ...,
+      _type == "internalLink" => {
+        ...,
+        "article": article->{
+          _id,
+          title,
+          "slug": slug.current,
+          "section": section->{"slug": slug.current}
+        },
+        "guide": guide->{_id, title, "slug": slug.current},
+        "section": section->{_id, title, "slug": slug.current},
+        "domain": domain->{_id, title, "slug": slug.current},
+        "method": method->{
+          _id,
+          title,
+          "slug": slug.current,
+          "domain": domain->{"slug": slug.current}
+        }
+      },
+      _type == "glossaryRef" => {
+        ...,
+        "term": term->{_id, term, "slug": slug.current, definition}
+      },
+      _type == "skillRef" => {
+        ...,
+        "skill": skill->{_id, title, "slug": slug.current}
+      }
+    }
+  }`
+
 // ── Article ───────────────────────────────────────────────────────────────────
 
 export type Maturity = 'established' | 'recommended' | 'exploratory' | 'deprecated'
@@ -147,95 +206,7 @@ export const articleQuery = `*[_type == "hb.article"
     "date": coalesce(lastVerifiedAt, _updatedAt)
   },
   "relatedSkills": relatedSkills[]->{_id, title, "slug": slug.current, skillType, summary, maturity},
-  "body": body[]{
-    ...,
-    _type == "hb.hotspotFigure" => {
-      ...,
-      "imageUrl": image.asset->url
-    },
-    _type == "hb.skillEmbed" => {
-      "skill": skill->{
-        _id, title,
-        "slug": slug.current,
-        summary, skillType, maturity,
-        "promptArtifact": promptArtifact{
-          "systemPrompt": systemPrompt.code,
-          "userPromptTemplate": userPromptTemplate.code,
-          variables[]{ name, description, example }
-        },
-        "workflowArtifact": workflowArtifact{
-          steps[]{ title, prompt, expectedOutput, notes }
-        },
-        "evaluationArtifact": evaluationArtifact{
-          criteria[]{ label, description, scoringGuide }
-        }
-      }
-    },
-    _type == "hb.conceptModel" => {
-      ...,
-      "items": items[]{
-        ...,
-        "content": content[]{
-          ...,
-          _type == "hb.hotspotFigure" => { ..., "imageUrl": image.asset->url },
-          _type == "hb.skillEmbed" => {
-            "skill": skill->{ _id, title, "slug": slug.current, summary, skillType, maturity,
-              "promptArtifact": promptArtifact{ "systemPrompt": systemPrompt.code, "userPromptTemplate": userPromptTemplate.code, variables[]{ name, description, example } }
-            }
-          },
-          _type == "hb.snippetRef" => { ..., "snippet": snippet->{_id, title, "slug": slug.current} },
-          _type == "hb.stepList" => {
-            ...,
-            "steps": steps[]{
-              _key, title, duration,
-              description,
-              "roles": roles[]->{_id, title}
-            }
-          },
-          markDefs[]{
-            ...,
-            _type == "internalLink" => { ...,
-              "article": article->{ _id, title, "slug": slug.current, "section": section->{"slug": slug.current} },
-              "guide": guide->{_id, title, "slug": slug.current},
-              "section": section->{_id, title, "slug": slug.current}
-            },
-            _type == "glossaryRef" => { ..., "term": term->{_id, term, "slug": slug.current, definition} },
-            _type == "skillRef" => { ..., "skill": skill->{_id, title, "slug": slug.current} }
-          }
-        }
-      }
-    },
-    _type == "hb.stepList" => {
-      ...,
-      "steps": steps[]{
-        _key, title, duration,
-        description,
-        "roles": roles[]->{_id, title}
-      }
-    },
-    markDefs[]{
-      ...,
-      _type == "internalLink" => {
-        ...,
-        "article": article->{
-          _id,
-          title,
-          "slug": slug.current,
-          "section": section->{"slug": slug.current}
-        },
-        "guide": guide->{_id, title, "slug": slug.current},
-        "section": section->{_id, title, "slug": slug.current}
-      },
-      _type == "glossaryRef" => {
-        ...,
-        "term": term->{_id, term, "slug": slug.current, definition}
-      },
-      _type == "skillRef" => {
-        ...,
-        "skill": skill->{_id, title, "slug": slug.current}
-      }
-    }
-  }
+  "body": ${bodyProjection}
 }`
 
 export const articleBySlugQuery = articleQuery
@@ -544,95 +515,7 @@ export const guideBySlugQuery = `*[_type == "hb.guide"
     maturity
   },
   "relatedSkills": relatedSkills[]->{_id, title, "slug": slug.current, skillType, summary, maturity},
-  "body": body[]{
-    ...,
-    _type == "hb.hotspotFigure" => {
-      ...,
-      "imageUrl": image.asset->url
-    },
-    _type == "hb.skillEmbed" => {
-      "skill": skill->{
-        _id, title,
-        "slug": slug.current,
-        summary, skillType, maturity,
-        "promptArtifact": promptArtifact{
-          "systemPrompt": systemPrompt.code,
-          "userPromptTemplate": userPromptTemplate.code,
-          variables[]{ name, description, example }
-        },
-        "workflowArtifact": workflowArtifact{
-          steps[]{ title, prompt, expectedOutput, notes }
-        },
-        "evaluationArtifact": evaluationArtifact{
-          criteria[]{ label, description, scoringGuide }
-        }
-      }
-    },
-    _type == "hb.conceptModel" => {
-      ...,
-      "items": items[]{
-        ...,
-        "content": content[]{
-          ...,
-          _type == "hb.hotspotFigure" => { ..., "imageUrl": image.asset->url },
-          _type == "hb.skillEmbed" => {
-            "skill": skill->{ _id, title, "slug": slug.current, summary, skillType, maturity,
-              "promptArtifact": promptArtifact{ "systemPrompt": systemPrompt.code, "userPromptTemplate": userPromptTemplate.code, variables[]{ name, description, example } }
-            }
-          },
-          _type == "hb.snippetRef" => { ..., "snippet": snippet->{_id, title, "slug": slug.current} },
-          _type == "hb.stepList" => {
-            ...,
-            "steps": steps[]{
-              _key, title, duration,
-              description,
-              "roles": roles[]->{_id, title}
-            }
-          },
-          markDefs[]{
-            ...,
-            _type == "internalLink" => { ...,
-              "article": article->{ _id, title, "slug": slug.current, "section": section->{"slug": slug.current} },
-              "guide": guide->{_id, title, "slug": slug.current},
-              "section": section->{_id, title, "slug": slug.current}
-            },
-            _type == "glossaryRef" => { ..., "term": term->{_id, term, "slug": slug.current, definition} },
-            _type == "skillRef" => { ..., "skill": skill->{_id, title, "slug": slug.current} }
-          }
-        }
-      }
-    },
-    _type == "hb.stepList" => {
-      ...,
-      "steps": steps[]{
-        _key, title, duration,
-        description,
-        "roles": roles[]->{_id, title}
-      }
-    },
-    markDefs[]{
-      ...,
-      _type == "internalLink" => {
-        ...,
-        "article": article->{
-          _id,
-          title,
-          "slug": slug.current,
-          "section": section->{"slug": slug.current}
-        },
-        "guide": guide->{_id, title, "slug": slug.current},
-        "section": section->{_id, title, "slug": slug.current}
-      },
-      _type == "glossaryRef" => {
-        ...,
-        "term": term->{_id, term, "slug": slug.current, definition}
-      },
-      _type == "skillRef" => {
-        ...,
-        "skill": skill->{_id, title, "slug": slug.current}
-      }
-    }
-  }
+  "body": ${bodyProjection}
 }`
 
 export async function fetchGuide(slug: string): Promise<GuideData | null> {
@@ -647,6 +530,192 @@ export const allGuideParamsQuery = `*[_type == "hb.guide" && hidden != true && d
 export async function fetchAllGuideParams(): Promise<{ slug: string }[]> {
   const data = await client.fetch(allGuideParamsQuery)
   return (data as { slug: string }[]) ?? []
+}
+
+// ── Methods ──────────────────────────────────────────────────────────────────
+
+export type MethodType = 'method' | 'practice'
+export type MethodDocumentType = 'pdf' | 'docx' | 'xlsx' | 'pptx' | 'link' | 'other'
+
+export interface DomainListItem {
+  _id: string
+  title: string
+  slug: string
+  description: string | null
+  icon: string | null
+  color: string | null
+  methodCount: number
+}
+
+export interface DomainData extends DomainListItem {}
+
+export interface MethodListItem {
+  _id: string
+  title: string
+  slug: string
+  summary: string | null
+  type: MethodType
+  domain: { _id?: string; title: string; slug: string }
+  expertises: { title: string; slug: string }[]
+}
+
+export interface MethodNavigationMethod extends MethodListItem {
+  subMethods: MethodListItem[]
+}
+
+export interface MethodNavigationDomain {
+  _id: string
+  title: string
+  slug: string
+  methods: MethodNavigationMethod[]
+}
+
+export interface MethodNavigationData {
+  domains: MethodNavigationDomain[]
+}
+
+export interface MethodResourceLink {
+  title: string
+  url: string
+  documentType: MethodDocumentType
+}
+
+export interface MethodParentContext {
+  _id: string
+  title: string
+  slug: string
+  domain: { title: string; slug: string }
+  subMethods: MethodListItem[]
+}
+
+export interface MethodData extends MethodListItem {
+  subMethodsTitle: string | null
+  links: MethodResourceLink[]
+  subMethods: MethodListItem[]
+  relatedMethods: MethodListItem[]
+  parent: MethodParentContext | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body: any[]
+}
+
+const methodListProjection = `{
+  _id,
+  title,
+  "slug": slug.current,
+  summary,
+  type,
+  subMethodsTitle,
+  "domain": domain->{_id, title, "slug": slug.current},
+  "expertises": expertises[]->{title, "slug": slug.current}
+}`
+
+export const methodNavigationQuery = `*[_type == "hb.domain"] | order(title asc) {
+  _id,
+  title,
+  "slug": slug.current,
+  "methods": *[
+    _type == "hb.method"
+    && hidden != true
+    && domain._ref == ^._id
+    && !(_id in *[_type == "hb.method" && hidden != true].subMethods[]._ref)
+  ] | order(title asc) {
+    _id,
+    title,
+    "slug": slug.current,
+    summary,
+    type,
+    "domain": domain->{_id, title, "slug": slug.current},
+    "expertises": expertises[]->{title, "slug": slug.current},
+    "subMethods": subMethods[]->${methodListProjection}
+  }
+}`
+
+export async function fetchMethodNavigation(): Promise<MethodNavigationData> {
+  const { data } = await sanityFetch({ query: methodNavigationQuery })
+  return { domains: (data as MethodNavigationDomain[]) ?? [] }
+}
+
+export const domainsQuery = `*[_type == "hb.domain"] | order(title asc) {
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  icon,
+  color,
+  "methodCount": count(*[_type == "hb.method" && hidden != true && references(^._id)])
+}`
+
+export async function fetchDomains(): Promise<DomainListItem[]> {
+  const { data } = await sanityFetch({ query: domainsQuery })
+  return (data as DomainListItem[]) ?? []
+}
+
+export const domainBySlugQuery = `*[_type == "hb.domain" && slug.current == $domain][0]{
+  _id,
+  title,
+  "slug": slug.current,
+  description,
+  icon,
+  color,
+  "methodCount": count(*[_type == "hb.method" && hidden != true && references(^._id)])
+}`
+
+export async function fetchDomain(domain: string): Promise<DomainData | null> {
+  const { data } = await sanityFetch({ query: domainBySlugQuery, params: { domain } })
+  return data as DomainData | null
+}
+
+export const domainMethodsQuery = `*[
+  _type == "hb.method"
+  && hidden != true
+  && domain->slug.current == $domain
+  && !(_id in *[_type == "hb.method" && hidden != true].subMethods[]._ref)
+] | order(title asc) ${methodListProjection}`
+
+export async function fetchDomainMethods(domain: string): Promise<MethodListItem[]> {
+  const { data } = await sanityFetch({ query: domainMethodsQuery, params: { domain } })
+  return (data as MethodListItem[]) ?? []
+}
+
+export const methodBySlugQuery = `*[_type == "hb.method"
+  && slug.current == $slug
+  && domain->slug.current == $domain
+  && hidden != true
+][0]{
+  _id,
+  title,
+  "slug": slug.current,
+  summary,
+  type,
+  subMethodsTitle,
+  "domain": domain->{_id, title, "slug": slug.current},
+  "expertises": expertises[]->{title, "slug": slug.current},
+  links[]{title, url, documentType},
+  "subMethods": subMethods[]->${methodListProjection},
+  "relatedMethods": relatedMethods[]->${methodListProjection},
+  "parent": *[_type == "hb.method" && hidden != true && references(^._id)] | order(title asc)[0]{
+    _id,
+    title,
+    "slug": slug.current,
+    "domain": domain->{title, "slug": slug.current},
+    "subMethods": subMethods[]->${methodListProjection}
+  },
+  "body": ${bodyProjection}
+}`
+
+export async function fetchMethod(domain: string, slug: string): Promise<MethodData | null> {
+  const { data } = await sanityFetch({ query: methodBySlugQuery, params: { domain, slug } })
+  return data as MethodData | null
+}
+
+export const allMethodParamsQuery = `*[_type == "hb.method" && hidden != true && defined(slug) && defined(domain->slug)]{
+  "domain": domain->slug.current,
+  "slug": slug.current
+}`
+
+export async function fetchAllMethodParams(): Promise<{ domain: string; slug: string }[]> {
+  const data = await client.fetch(allMethodParamsQuery)
+  return (data as { domain: string; slug: string }[]) ?? []
 }
 
 // ── Glossary ──────────────────────────────────────────────────────────────────

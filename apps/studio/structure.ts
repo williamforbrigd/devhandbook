@@ -10,6 +10,10 @@ export async function structure(S: StructureBuilder, context: StructureResolverC
     `*[_type == "hb.section"] | order(order asc, title asc) { _id, title, "slug": slug.current }`,
   )
 
+  const domains: Array<{ _id: string; title: string; slug: string }> = await client.fetch(
+    `*[_type == "hb.domain"] | order(title asc) { _id, title, "slug": slug.current }`,
+  )
+
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   const articlesBySectionList = (sectionId: string, sectionTitle: string) =>
@@ -34,6 +38,18 @@ export async function structure(S: StructureBuilder, context: StructureResolverC
           .schemaType('hb.guide')
           .filter('_type == "hb.guide" && section._ref == $sectionId && !hidden')
           .params({ sectionId }),
+      )
+
+  const methodsByDomainList = (domainId: string, domainTitle: string) =>
+    S.listItem()
+      .id(`methods-domain-${domainId}`)
+      .title(domainTitle)
+      .child(
+        S.documentList()
+          .title(`${domainTitle} — Methods`)
+          .schemaType('hb.method')
+          .filter('_type == "hb.method" && domain._ref == $domainId && !hidden')
+          .params({ domainId }),
       )
 
   // ── Documentation group ──────────────────────────────────────────────────
@@ -118,6 +134,35 @@ export async function structure(S: StructureBuilder, context: StructureResolverC
                 .schemaType('hb.guide')
                 .filter('_type == "hb.guide" && isLivingDocument == true'),
             ),
+        ]),
+    )
+
+  // ── Method model POC ────────────────────────────────────────────────────
+
+  const methodModelPocGroup = S.listItem()
+    .id('method-model-poc')
+    .title('Method model POC')
+    .child(
+      S.list()
+        .title('Method model POC')
+        .items([
+          S.listItem()
+            .id('poc-all-methods')
+            .title('All methods')
+            .child(S.documentTypeList('hb.method').title('All methods')),
+          S.listItem()
+            .id('poc-methods-by-domain')
+            .title('By domain')
+            .child(
+              S.list()
+                .title('Methods by domain')
+                .items(domains.map((domain) => methodsByDomainList(domain._id, domain.title))),
+            ),
+          S.divider(),
+          S.listItem()
+            .id('poc-domains')
+            .title('Domains')
+            .child(S.documentTypeList('hb.domain').title('Domains')),
         ]),
     )
 
@@ -242,6 +287,8 @@ export async function structure(S: StructureBuilder, context: StructureResolverC
       documentationGroup,
       methodsGroup,
       aiSkillsGroup,
+      S.divider(),
+      methodModelPocGroup,
       S.divider(),
       navigationItem,
       S.divider(),

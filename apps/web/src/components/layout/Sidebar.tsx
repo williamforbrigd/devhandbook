@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Icon } from '../ui/Icon'
 import { APP_VERSION_LABEL } from '../../lib/version'
-import type { NavGroup, NavItem, Expertise, NavigationData, SidebarGuide } from '../../lib/queries'
+import type { NavGroup, NavItem, Expertise, NavigationData, SidebarGuide, MethodNavigationData, MethodNavigationDomain, MethodNavigationMethod } from '../../lib/queries'
 
 // ── Brand block (top of sidebar) ──────────────────────────────────────────────
 
@@ -287,17 +287,124 @@ function GuidesFlatList({
   )
 }
 
+function MethodNavItem({ method, onNavigate }: { method: MethodNavigationMethod; onNavigate?: () => void }) {
+  const pathname = usePathname()
+  const href = `/methods/${method.domain.slug}/${method.slug}`
+  const isActive = pathname === href
+
+  return (
+    <div className="hb-method-nav__itemwrap">
+      <Link href={href} className={`hb-nav__item${isActive ? ' is-active' : ''}`} onClick={onNavigate}>
+        {method.title}
+      </Link>
+      {(method.subMethods ?? []).length > 0 && (
+        <div className="hb-method-nav__children">
+          {method.subMethods.map((subMethod) => {
+            const subHref = `/methods/${subMethod.domain.slug}/${subMethod.slug}`
+            return (
+              <Link
+                key={subMethod._id}
+                href={subHref}
+                className={`hb-nav__item${pathname === subHref ? ' is-active' : ''}`}
+                onClick={onNavigate}
+              >
+                {subMethod.title}
+              </Link>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MethodDomainSection({ domain, onNavigate }: { domain: MethodNavigationDomain; onNavigate?: () => void }) {
+  const pathname = usePathname()
+  const storageKey = `method-nav-open-${domain.slug}`
+  const [open, setOpen] = useState(true)
+
+  useEffect(() => {
+    const stored = localStorage.getItem(storageKey)
+    if (stored !== null) setOpen(stored !== 'false')
+  }, [storageKey])
+
+  const toggle = () => {
+    const next = !open
+    setOpen(next)
+    localStorage.setItem(storageKey, String(next))
+  }
+
+  return (
+    <div className="hb-nav__group hb-method-nav__domain">
+      <button type="button" onClick={toggle} className="hb-nav__grouphead" aria-expanded={open}>
+        <span
+          className="hb-nav__caret"
+          aria-hidden="true"
+          style={{
+            display: 'inline-flex',
+            transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+            transition: 'transform 150ms ease',
+          }}
+        >
+          <Icon name="chevronRight" size={12} />
+        </span>
+        <span>{domain.title}</span>
+      </button>
+      {open && (
+        <div className="hb-nav__items">
+          <Link
+            href={`/methods/${domain.slug}`}
+            className={`hb-nav__item${pathname === `/methods/${domain.slug}` ? ' is-active' : ''}`}
+            onClick={onNavigate}
+          >
+            Overview
+          </Link>
+          {(domain.methods ?? []).map((method) => (
+            <MethodNavItem key={method._id} method={method} onNavigate={onNavigate} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MethodsNav({ methodNavigation, onNavigate }: { methodNavigation: MethodNavigationData; onNavigate?: () => void }) {
+  const pathname = usePathname()
+  const domains = methodNavigation.domains ?? []
+
+  if (domains.length === 0) return null
+
+  return (
+    <nav className="hb-nav hb-method-nav" aria-label="Method navigation">
+      <div className="hb-method-nav__divider" />
+      <Link
+        href="/methods"
+        className={`hb-method-nav__root${pathname === '/methods' ? ' is-active' : ''}`}
+        onClick={onNavigate}
+      >
+        <Icon name="compass" size={14} />
+        <span>Methods</span>
+      </Link>
+      {domains.map((domain) => (
+        <MethodDomainSection key={domain._id} domain={domain} onNavigate={onNavigate} />
+      ))}
+    </nav>
+  )
+}
+
 // ── Sidebar content ───────────────────────────────────────────────────────────
 
 export function SidebarContent({
   navigation,
   expertises,
   guides,
+  methodNavigation,
   onNavigate,
 }: {
   navigation: NavigationData | null
   expertises: Expertise[]
   guides: SidebarGuide[]
+  methodNavigation: MethodNavigationData
   onNavigate?: () => void
 }): React.JSX.Element {
   const [selectedExpertises, setSelectedExpertises] = useState<Set<string>>(new Set())
@@ -376,6 +483,7 @@ export function SidebarContent({
           <GuidesFlatList guides={guides} />
         </nav>
       )}
+      <MethodsNav methodNavigation={methodNavigation} onNavigate={onNavigate} />
       <nav className="hb-side__utility" aria-label="Handbook utilities">
         <Link
           href="/glossary"
@@ -428,12 +536,14 @@ export function MobileDrawer({
   navigation,
   expertises,
   guides,
+  methodNavigation,
 }: {
   open: boolean
   onClose: () => void
   navigation: NavigationData | null
   expertises: Expertise[]
   guides: SidebarGuide[]
+  methodNavigation: MethodNavigationData
 }): React.JSX.Element {
   const drawerRef = useRef<HTMLDivElement>(null)
 
@@ -470,7 +580,7 @@ export function MobileDrawer({
           paddingTop: 56,
         }}
       >
-        <SidebarContent navigation={navigation} expertises={expertises} guides={guides} onNavigate={onClose} />
+        <SidebarContent navigation={navigation} expertises={expertises} guides={guides} methodNavigation={methodNavigation} onNavigate={onClose} />
       </div>
     </>
   )

@@ -2,16 +2,18 @@
 
 import { useState } from 'react'
 import { MobileMenuButton, MobileDrawer } from './Sidebar'
-import type { NavigationData, Expertise, SidebarGuide } from '../../lib/queries'
+import type { NavigationData, Expertise, SidebarGuide, MethodNavigationData } from '../../lib/queries'
 
 export function MobileNav({
   navigation,
   expertises,
   guides,
+  methodNavigation,
 }: {
   navigation: NavigationData | null
   expertises: Expertise[]
   guides: SidebarGuide[]
+  methodNavigation: MethodNavigationData
 }): React.JSX.Element {
   const [open, setOpen] = useState(false)
   return (
@@ -23,6 +25,7 @@ export function MobileNav({
         navigation={navigation}
         expertises={expertises}
         guides={guides}
+        methodNavigation={methodNavigation}
       />
     </>
   )
