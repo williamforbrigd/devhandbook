@@ -7,7 +7,7 @@ import { Breadcrumb } from '../components/layout/Breadcrumb'
 import { MobileNav } from '../components/layout/MobileNav'
 import { ThemeProvider } from '../components/layout/ThemeProvider'
 import { TocProvider } from '../components/layout/TocContext'
-import { fetchNavigation, fetchExpertises } from '../lib/queries'
+import { fetchNavigation, fetchExpertises, fetchAllGuidesForSidebar } from '../lib/queries'
 import { SanityLive } from '../lib/live'
 import { APP_VERSION_LABEL } from '../lib/version'
 import './globals.css'
@@ -23,9 +23,10 @@ export default async function RootLayout({
   children: React.ReactNode
 }): Promise<React.JSX.Element> {
   const { isEnabled: isDraftMode } = await draftMode()
-  const [navigation, expertises] = await Promise.all([
+  const [navigation, expertises, guides] = await Promise.all([
     fetchNavigation(),
     fetchExpertises(),
+    fetchAllGuidesForSidebar(),
   ])
 
   return (
@@ -46,7 +47,7 @@ export default async function RootLayout({
         <ThemeProvider>
           <TocProvider>
             <div className="hb-shell hb-shell--desktop hb-shell--three">
-              <SidebarContent navigation={navigation} expertises={expertises} />
+              <SidebarContent navigation={navigation} expertises={expertises} guides={guides} />
 
               <div className="hb-pane hb-pane--with-toc">
                 <div className="hb-main">
@@ -63,7 +64,7 @@ export default async function RootLayout({
             </div>
 
             <div className="show-below-lg">
-              <MobileNav navigation={navigation} expertises={expertises} />
+              <MobileNav navigation={navigation} expertises={expertises} guides={guides} />
             </div>
 
             <SanityLive />

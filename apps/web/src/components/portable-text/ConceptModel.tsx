@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { PortableText } from '@portabletext/react'
-import type { PortableTextComponents } from '@portabletext/react'
+import { baseBodyComponents } from './bodyComponents'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -19,25 +19,11 @@ interface Item {
 
 const ACCENT = '#6366f1'
 
-const contentPt: PortableTextComponents = {
-  block: {
-    normal: ({ children }) => (
-      <p style={{ margin: '0 0 0.55em', fontSize: 13, lineHeight: 1.6, color: 'var(--color-text)' }}>
-        {children}
-      </p>
-    ),
-  },
-  marks: {
-    strong: ({ children }) => <strong style={{ fontWeight: 700 }}>{children}</strong>,
-    em: ({ children }) => <em>{children}</em>,
-  },
-}
-
 function ContentBlocks({ blocks }: { blocks: Item['content'] }) {
   if (!blocks?.length) return null
   return (
-    <div style={{ paddingTop: 2 }}>
-      <PortableText value={blocks} components={contentPt} />
+    <div className="prose">
+      <PortableText value={blocks} components={baseBodyComponents} />
     </div>
   )
 }
@@ -123,33 +109,29 @@ function DiamondTrack({ count }: { count: number }) {
 }
 
 function DoubleDiamondVariant({ items }: { items: Item[] }) {
-  const [active, setActive] = useState<number | null>(null)
-  const toggle = (i: number) => setActive((p) => (p === i ? null : i))
+  const [active, setActive] = useState<number>(0)
 
   return (
     <ModelFrame>
-      <DiamondTrack count={items.length} />
-
-      {/* Phase cards */}
+      {/* Phase selector row */}
       <div style={{ display: 'flex', overflowX: 'auto' }}>
         {items.map((item, i) => {
-          const isDiverge = i % 2 === 0
           const isActive = active === i
           return (
             <button
               key={item._key ?? i}
               type="button"
               aria-expanded={isActive}
-              onClick={() => toggle(i)}
+              onClick={() => setActive(i)}
               style={{
-                flex: '1 0 140px',
+                flex: '1 0 120px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: 6,
-                padding: '16px 12px',
+                gap: 12,
+                padding: '24px 16px 18px',
                 background: isActive
-                  ? `color-mix(in srgb, ${ACCENT} 8%, var(--color-surface))`
+                  ? `color-mix(in srgb, ${ACCENT} 6%, var(--color-surface))`
                   : 'var(--color-surface)',
                 borderRight: i < items.length - 1 ? '1px solid var(--color-border)' : 'none',
                 borderBottom: isActive ? `2px solid ${ACCENT}` : '2px solid transparent',
@@ -158,57 +140,43 @@ function DoubleDiamondVariant({ items }: { items: Item[] }) {
                 transition: 'background 0.15s',
               }}
             >
-              {/* Diamond number badge */}
+              {/* Large diamond shape */}
               <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 30,
-                height: 30,
-                background: isActive ? ACCENT : 'var(--color-bg-subtle)',
-                color: isActive ? '#fff' : 'var(--color-text-muted)',
+                display: 'inline-block',
+                width: 60,
+                height: 60,
+                background: isActive
+                  ? ACCENT
+                  : `color-mix(in srgb, ${ACCENT} 10%, var(--color-surface))`,
+                transform: 'rotate(45deg)',
+                borderRadius: 6,
+                flexShrink: 0,
+                border: `2px solid ${isActive ? ACCENT : `color-mix(in srgb, ${ACCENT} 30%, var(--color-border))`}`,
+                transition: 'background 0.15s, border-color 0.15s',
+              }} />
+
+              <span style={{
                 fontWeight: 700,
                 fontSize: 13,
-                transform: 'rotate(45deg)',
-                borderRadius: 4,
-                flexShrink: 0,
-                border: `1px solid ${isActive ? ACCENT : 'var(--color-border)'}`,
-                transition: 'background 0.15s, color 0.15s',
+                color: isActive ? ACCENT : 'var(--color-text)',
+                lineHeight: 1.3,
+                transition: 'color 0.15s',
               }}>
-                <span style={{ transform: 'rotate(-45deg)' }}>{i + 1}</span>
-              </span>
-
-              <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--color-text)', lineHeight: 1.3 }}>
                 {item.label}
-              </span>
-              {item.sublabel && (
-                <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{item.sublabel}</span>
-              )}
-
-              {/* Diverge / Converge tag */}
-              <span style={{
-                fontSize: 10,
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: isDiverge ? '#7c3aed' : '#0369a1',
-                opacity: 0.8,
-              }}>
-                {isDiverge ? '⟨ Diverge' : 'Converge ⟩'}
               </span>
             </button>
           )
         })}
       </div>
 
-      {/* Expanded content panel */}
-      {active !== null && items[active] && (
+      {/* Detail panel */}
+      {items[active] && (
         <div style={{
-          padding: '14px 20px',
+          padding: '16px 20px',
           borderTop: `2px solid ${ACCENT}`,
           background: `color-mix(in srgb, ${ACCENT} 4%, var(--color-surface))`,
         }}>
-          <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 8, color: ACCENT }}>
+          <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 10, color: ACCENT }}>
             {items[active].label}
           </div>
           <ContentBlocks blocks={items[active].content} />

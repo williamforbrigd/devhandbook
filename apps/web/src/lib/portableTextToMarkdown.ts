@@ -130,7 +130,7 @@ function renderStepList(block: any): string {
   const title = block.title ? `### ${block.title}\n\n` : ''
   const steps = (block.steps ?? [])
     .map((step: any, i: number) => {
-      const role = step.role ? ` *(${step.role})*` : ''
+      const role = step.roles?.length ? ` *(${step.roles.map((r: any) => r.title).join(', ')})*` : ''
       const duration = step.duration ? ` — ${step.duration}` : ''
       const desc = step.description
         ? `\n   ${portableTextToMarkdown(step.description).replace(/\n/g, '\n   ')}`

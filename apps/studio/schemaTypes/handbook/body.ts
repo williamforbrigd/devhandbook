@@ -22,12 +22,9 @@ const languageAlternatives = [
   { title: 'Markdown', value: 'markdown' },
 ]
 
-export const body = defineField({
-  name: 'body',
-  title: 'Body',
-  type: 'array',
-  of: [
-    // ── Standard block ──────────────────────────────────────────────────────
+// All body block types except hb.conceptModel — reused in nested content fields
+const coreMembers = [
+  // ── Standard block ──────────────────────────────────────────────────────
     defineArrayMember({
       type: 'block',
       styles: [
@@ -350,10 +347,15 @@ export const body = defineField({
                   type: 'array',
                   of: [{ type: 'block' }],
                 }),
-                defineField({ name: 'role', title: 'Role', type: 'string' }),
+                defineField({
+                  name: 'roles',
+                  title: 'Roles',
+                  type: 'array',
+                  of: [{ type: 'reference', to: [{ type: 'hb.role' }] }],
+                }),
                 defineField({ name: 'duration', title: 'Duration', type: 'string' }),
               ],
-              preview: { select: { title: 'title', subtitle: 'role' } },
+              preview: { select: { title: 'title' } },
             },
           ],
         }),
@@ -457,59 +459,67 @@ export const body = defineField({
       },
     }),
 
-    // ── hb.conceptModel ─────────────────────────────────────────────────────
-    defineArrayMember({
-      name: 'hb.conceptModel',
-      type: 'object',
-      title: 'Concept model',
-      fields: [
-        defineField({
-          name: 'variant',
-          title: 'Variant',
-          type: 'string',
-          components: { input: ConceptModelVariantInput },
-          options: {
-            list: [
-              { title: 'Double diamond', value: 'double-diamond' },
-              { title: 'Two-by-two', value: 'two-by-two' },
-              { title: 'Phases', value: 'phases' },
-              { title: 'Comparison', value: 'comparison' },
-            ],
-          },
-          validation: (Rule) => Rule.required(),
-        }),
-        defineField({ name: 'title', title: 'Title', type: 'string' }),
-        defineField({ name: 'description', title: 'Description', type: 'string' }),
-        defineField({
-          name: 'items',
-          title: 'Items',
-          type: 'array',
-          of: [
-            {
-              type: 'object',
-              fields: [
-                defineField({ name: 'label', title: 'Label', type: 'string', validation: (Rule) => Rule.required() }),
-                defineField({ name: 'sublabel', title: 'Sublabel', type: 'string' }),
-                defineField({
-                  name: 'content',
-                  title: 'Content',
-                  type: 'array',
-                  of: [{ type: 'block' }],
-                }),
-                defineField({ name: 'color', title: 'Color', type: 'string' }),
-              ],
-              preview: { select: { title: 'label', subtitle: 'sublabel' } },
-            },
-          ],
-          validation: (Rule) => Rule.min(2),
-        }),
-      ],
-      preview: {
-        select: { title: 'title', subtitle: 'variant' },
-        prepare({ title, subtitle }: { title?: string; subtitle?: string }) {
-          return { title: title ?? 'Concept model', subtitle }
-        },
+]
+
+// ── hb.conceptModel ─────────────────────────────────────────────────────────
+// Defined separately so items[] can reference coreMembers for their content
+const conceptModelMember = defineArrayMember({
+  name: 'hb.conceptModel',
+  type: 'object',
+  title: 'Concept model',
+  fields: [
+    defineField({
+      name: 'variant',
+      title: 'Variant',
+      type: 'string',
+      components: { input: ConceptModelVariantInput },
+      options: {
+        list: [
+          { title: 'Double diamond', value: 'double-diamond' },
+          { title: 'Two-by-two', value: 'two-by-two' },
+          { title: 'Phases', value: 'phases' },
+          { title: 'Comparison', value: 'comparison' },
+        ],
       },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({ name: 'title', title: 'Title', type: 'string' }),
+    defineField({ name: 'description', title: 'Description', type: 'string' }),
+    defineField({
+      name: 'items',
+      title: 'Items',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            defineField({ name: 'label', title: 'Label', type: 'string', validation: (Rule) => Rule.required() }),
+            defineField({ name: 'sublabel', title: 'Sublabel', type: 'string' }),
+            defineField({
+              name: 'content',
+              title: 'Content',
+              type: 'array',
+              of: coreMembers,
+            }),
+            defineField({ name: 'color', title: 'Color', type: 'string' }),
+          ],
+          preview: { select: { title: 'label', subtitle: 'sublabel' } },
+        },
+      ],
+      validation: (Rule) => Rule.min(2),
     }),
   ],
+  preview: {
+    select: { title: 'title', subtitle: 'variant' },
+    prepare({ title, subtitle }: { title?: string; subtitle?: string }) {
+      return { title: title ?? 'Concept model', subtitle }
+    },
+  },
+})
+
+export const body = defineField({
+  name: 'body',
+  title: 'Body',
+  type: 'array',
+  of: [...coreMembers, conceptModelMember],
 })

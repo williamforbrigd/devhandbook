@@ -124,7 +124,7 @@ export function Checklist({ value }: { value: any }): React.JSX.Element | null {
                 fontSize: 14,
                 lineHeight: 1.55,
                 color: isChecked ? 'var(--color-text-muted)' : item.optional ? 'var(--color-text-muted)' : 'var(--color-text)',
-                textDecoration: isChecked ? 'line-through' : 'none',
+                fontStyle: item.optional && !isChecked ? 'italic' : 'normal',
                 transition: 'color 0.12s',
               }}>
                 {item.text}
@@ -140,7 +140,7 @@ export function Checklist({ value }: { value: any }): React.JSX.Element | null {
                     padding: '1px 5px',
                     verticalAlign: 'middle',
                   }}>
-                    valgfri
+                    VALGFRITT
                   </span>
                 )}
               </span>

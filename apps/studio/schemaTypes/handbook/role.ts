@@ -1,4 +1,4 @@
-import { defineField, defineType } from 'sanity'
+import { defineField, defineType} from 'sanity';
 
 export const role = defineType({
   name: 'hb.role',
@@ -16,20 +16,13 @@ export const role = defineType({
       title: 'Slug',
       type: 'slug',
       options: {
-        source: 'title',
-      },
-    }),
-    defineField({
-      name: 'description',
-      title: 'Description',
-      type: 'text',
-      rows: 3,
-    }),
+        source: 'title'
+      }
+    })
   ],
   preview: {
     select: {
       title: 'title',
-      subtitle: 'description',
-    },
-  },
+    }
+  }
 })

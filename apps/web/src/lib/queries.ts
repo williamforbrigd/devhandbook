@@ -171,6 +171,48 @@ export const articleQuery = `*[_type == "hb.article"
         }
       }
     },
+    _type == "hb.conceptModel" => {
+      ...,
+      "items": items[]{
+        ...,
+        "content": content[]{
+          ...,
+          _type == "hb.hotspotFigure" => { ..., "imageUrl": image.asset->url },
+          _type == "hb.skillEmbed" => {
+            "skill": skill->{ _id, title, "slug": slug.current, summary, skillType, maturity,
+              "promptArtifact": promptArtifact{ "systemPrompt": systemPrompt.code, "userPromptTemplate": userPromptTemplate.code, variables[]{ name, description, example } }
+            }
+          },
+          _type == "hb.snippetRef" => { ..., "snippet": snippet->{_id, title, "slug": slug.current} },
+          _type == "hb.stepList" => {
+            ...,
+            "steps": steps[]{
+              _key, title, duration,
+              description,
+              "roles": roles[]->{_id, title}
+            }
+          },
+          markDefs[]{
+            ...,
+            _type == "internalLink" => { ...,
+              "article": article->{ _id, title, "slug": slug.current, "section": section->{"slug": slug.current} },
+              "guide": guide->{_id, title, "slug": slug.current},
+              "section": section->{_id, title, "slug": slug.current}
+            },
+            _type == "glossaryRef" => { ..., "term": term->{_id, term, "slug": slug.current, definition} },
+            _type == "skillRef" => { ..., "skill": skill->{_id, title, "slug": slug.current} }
+          }
+        }
+      }
+    },
+    _type == "hb.stepList" => {
+      ...,
+      "steps": steps[]{
+        _key, title, duration,
+        description,
+        "roles": roles[]->{_id, title}
+      }
+    },
     markDefs[]{
       ...,
       _type == "internalLink" => {
@@ -275,6 +317,7 @@ export interface SectionData {
   title: string
   slug: string
   description: string | null
+  icon: string | null
 }
 
 export interface ArticleListItem {
@@ -288,7 +331,7 @@ export interface ArticleListItem {
 }
 
 export const sectionQuery = `*[_type == "hb.section" && slug.current == $section][0]{
-  _id, title, "slug": slug.current, description
+  _id, title, "slug": slug.current, description, icon
 }`
 
 export const sectionBySlugQuery = sectionQuery
@@ -317,8 +360,8 @@ export async function fetchSectionArticles(section: string): Promise<ArticleList
 // ── All sections (home page) ──────────────────────────────────────────────────
 
 export interface SectionWithCount extends SectionData {
-  icon: string | null
   count: number
+  guideCount: number
 }
 
 export const allSectionsWithCountsQuery = `*[_type == "hb.section"]
@@ -328,7 +371,8 @@ export const allSectionsWithCountsQuery = `*[_type == "hb.section"]
   "slug": slug.current,
   description,
   icon,
-  "count": count(*[_type == "hb.article" && references(^._id) && hidden != true])
+  "count": count(*[_type == "hb.article" && references(^._id) && hidden != true]),
+  "guideCount": count(*[_type == "hb.guide" && references(^._id) && hidden != true])
 }`
 
 export async function fetchAllSectionsWithCounts(): Promise<SectionWithCount[]> {
@@ -387,6 +431,61 @@ export const guidesQuery = `*[_type == "hb.guide"] | order(title asc) {
 export async function fetchGuides(): Promise<GuideListItem[]> {
   const { data } = await sanityFetch({ query: guidesQuery })
   return (data as GuideListItem[]) ?? []
+}
+
+// ── Section guides (hub page) ─────────────────────────────────────────────────
+
+export interface SectionGuideListItem {
+  _id: string
+  title: string
+  slug: string
+  summary: string | null
+  maturity: Maturity
+  isLivingDocument: boolean
+  roles: { _id: string; title: string }[]
+  phases: { title: string; duration: string | null }[]
+}
+
+export const sectionGuidesQuery = `*[_type == "hb.guide"
+  && section->slug.current == $section
+  && hidden != true
+] | order(title asc) {
+  _id, title,
+  "slug": slug.current,
+  summary, maturity,
+  isLivingDocument,
+  "roles": roles[]->{_id, title},
+  phases[]{ title, duration }
+}`
+
+export async function fetchSectionGuides(section: string): Promise<SectionGuideListItem[]> {
+  const { data } = await sanityFetch({ query: sectionGuidesQuery, params: { section } })
+  return (data as SectionGuideListItem[]) ?? []
+}
+
+// ── All guides for sidebar ────────────────────────────────────────────────────
+
+export interface SidebarGuide {
+  _id: string
+  title: string
+  slug: string
+  phaseCount: number
+  roles: { _id: string; title: string }[]
+  sectionTitle: string | null
+}
+
+export const allGuidesForSidebarQuery = `*[_type == "hb.guide" && hidden != true]
+  | order(title asc) {
+  _id, title,
+  "slug": slug.current,
+  "phaseCount": count(phases),
+  "roles": roles[]->{_id, title},
+  "sectionTitle": section->title
+}`
+
+export async function fetchAllGuidesForSidebar(): Promise<SidebarGuide[]> {
+  const { data } = await sanityFetch({ query: allGuidesForSidebarQuery })
+  return (data as SidebarGuide[]) ?? []
 }
 
 export interface GuideData {
@@ -467,6 +566,48 @@ export const guideBySlugQuery = `*[_type == "hb.guide"
         "evaluationArtifact": evaluationArtifact{
           criteria[]{ label, description, scoringGuide }
         }
+      }
+    },
+    _type == "hb.conceptModel" => {
+      ...,
+      "items": items[]{
+        ...,
+        "content": content[]{
+          ...,
+          _type == "hb.hotspotFigure" => { ..., "imageUrl": image.asset->url },
+          _type == "hb.skillEmbed" => {
+            "skill": skill->{ _id, title, "slug": slug.current, summary, skillType, maturity,
+              "promptArtifact": promptArtifact{ "systemPrompt": systemPrompt.code, "userPromptTemplate": userPromptTemplate.code, variables[]{ name, description, example } }
+            }
+          },
+          _type == "hb.snippetRef" => { ..., "snippet": snippet->{_id, title, "slug": slug.current} },
+          _type == "hb.stepList" => {
+            ...,
+            "steps": steps[]{
+              _key, title, duration,
+              description,
+              "roles": roles[]->{_id, title}
+            }
+          },
+          markDefs[]{
+            ...,
+            _type == "internalLink" => { ...,
+              "article": article->{ _id, title, "slug": slug.current, "section": section->{"slug": slug.current} },
+              "guide": guide->{_id, title, "slug": slug.current},
+              "section": section->{_id, title, "slug": slug.current}
+            },
+            _type == "glossaryRef" => { ..., "term": term->{_id, term, "slug": slug.current, definition} },
+            _type == "skillRef" => { ..., "skill": skill->{_id, title, "slug": slug.current} }
+          }
+        }
+      }
+    },
+    _type == "hb.stepList" => {
+      ...,
+      "steps": steps[]{
+        _key, title, duration,
+        description,
+        "roles": roles[]->{_id, title}
       }
     },
     markDefs[]{
